@@ -81,8 +81,11 @@
     #geo { position: fixed; inset: 0; z-index: -2; pointer-events: none; will-change: transform; }
 
     /* 地球の地平線（GeoSpace） — 大気リムをもつ惑星の縁 */
-    .earth { position: fixed; left: 50%; bottom: -86vw; transform: translateX(-50%);
-      width: 168vw; height: 168vw; border-radius: 50%; z-index: -3; pointer-events: none;
+    /* 地球の地平線：直径は横幅基準でも、縁(リム)は calc で常に画面下から 34vh に固定（横長PCでも破綻しない） */
+    .earth { position: fixed; left: 50%; transform: translateX(-50%);
+      width: 200vw; height: 200vw; max-width: 2600px; max-height: 2600px;
+      border-radius: 50%; z-index: -3; pointer-events: none;
+      bottom: calc(34vh - min(200vw, 2600px));
       background: radial-gradient(circle at 50% 20%, #16244e 0%, #0a1228 32%, #05060e 58%);
       box-shadow: inset 0 4px 60px rgba(8,12,30,.9);
     }
@@ -305,7 +308,7 @@
       cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR);
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       ctx.clearRect(0, 0, w, h);
-      const n = Math.min(260, Math.round(w * h / 7000));
+      const n = Math.min(440, Math.round(w * h / 6000));
       for (let i = 0; i < n; i++) {
         const x = Math.random() * w, y = Math.random() * h;
         const r = Math.random() * 1.1 + 0.25;
