@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#04050b">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%2304050b'/><g fill='none' stroke='%236ad0ff' stroke-width='1.3'><circle cx='16' cy='16' r='9'/><polygon points='16,5 25,21 7,21'/></g><circle cx='16' cy='16' r='2.2' fill='%23e8c87a'/></svg>">
   <title>G.S. Poetics — 宇宙の波を、幾何学の詩へ</title>
   <meta name="description" content="G.S. Poetics — GeoSpace × Geometric × Space × Poetics。音・光・波・幾何学を、アカデミックな文脈で詩学へと翻訳するアート＆デザインのリサーチ実践。Turning waves into geometry, geometry into poetics.">
 
@@ -63,7 +65,7 @@
     }
 
     /* ════════ 宇宙の背景（固定・多層） ════════ */
-    .bg-space { position: fixed; inset: 0; z-index: -3; pointer-events: none;
+    .bg-space { position: fixed; inset: 0; z-index: -4; pointer-events: none;
       background:
         radial-gradient(38% 30% at 18% 12%, rgba(58,72,150,.34), transparent 70%),
         radial-gradient(32% 26% at 84% 22%, rgba(120,70,150,.22), transparent 72%),
@@ -72,13 +74,15 @@
         linear-gradient(180deg, #05060e 0%, #04050b 55%, #03040a 100%);
       will-change: transform;
     }
-    #stars { position: fixed; inset: 0; z-index: -2; pointer-events: none;
+    #stars { position: fixed; inset: 0; z-index: -3; pointer-events: none;
       animation: twinkle 7s ease-in-out infinite; will-change: transform, opacity; }
     @keyframes twinkle { 0%,100% { opacity:.82 } 50% { opacity:1 } }
+    /* 宇宙的幾何学模様の散布レイヤー（全面・高FPS） */
+    #geo { position: fixed; inset: 0; z-index: -2; pointer-events: none; will-change: transform; }
 
     /* 地球の地平線（GeoSpace） — 大気リムをもつ惑星の縁 */
     .earth { position: fixed; left: 50%; bottom: -86vw; transform: translateX(-50%);
-      width: 168vw; height: 168vw; border-radius: 50%; z-index: -2; pointer-events: none;
+      width: 168vw; height: 168vw; border-radius: 50%; z-index: -3; pointer-events: none;
       background: radial-gradient(circle at 50% 20%, #16244e 0%, #0a1228 32%, #05060e 58%);
       box-shadow: inset 0 4px 60px rgba(8,12,30,.9);
     }
@@ -206,6 +210,7 @@
 
   <div class="bg-space" id="nebula"></div>
   <canvas id="stars" aria-hidden="true"></canvas>
+  <canvas id="geo" aria-hidden="true"></canvas>
   <div class="earth" aria-hidden="true"></div>
 
   <!-- ════════ HERO ════════ -->
@@ -262,17 +267,9 @@
 
   <!-- ════════ WA ════════ -->
   <section id="wa">
-    <div class="wrap">
-      <div class="twocol">
-        <div class="reveal">
-          <div class="sec-head" style="margin-bottom:24px;"><h2>和<span class="en">A Japanese sensibility</span></h2></div>
-          <p class="lead">藍と金、墨と余白。<span class="em">間（ま）</span>を設計に取り込み、西洋の幾何学に日本の静けさを重ねる。同種の表現が世界に在るからこそ、和の文脈が固有の佇まいになる。</p>
-        </div>
-        <div class="reveal">
-          <div class="sec-head" style="margin-bottom:24px;"><h2>なぜ<span class="en">Origin</span></h2></div>
-          <p class="lead">大学で<span class="em">衛星データの解析</span>に向き合った日々。ノイズの中に立ち現れる秩序——<span class="em">宇宙 × 波形 × 幾何学</span>への問いは、そこから始まった。</p>
-        </div>
-      </div>
+    <div class="wrap" style="text-align:center;">
+      <div class="sec-head reveal" style="margin-bottom:28px;"><h2>和<span class="en">A Japanese sensibility</span></h2></div>
+      <p class="lead reveal" style="margin:0 auto;">藍と金、墨と余白。<span class="em">間（ま）</span>を設計に取り込み、西洋の幾何学に日本の静けさを重ねる。同種の表現が世界に在るからこそ、和の文脈が固有の佇まいになる。</p>
     </div>
   </section>
 
@@ -332,7 +329,97 @@
     let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(draw, 200); });
   })();
 
-  /* ═══ ヒーロー幾何学（音→模様）— 軽量・可視時のみ・30fps ═══ */
+  /* ═══ 宇宙的幾何学模様の散布（全面・高FPS・可視時のみ） ═══ */
+  (function () {
+    const cv = document.getElementById('geo');
+    const ctx = cv.getContext('2d');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let W = 0, H = 0, DPR = 1, motifs = [], raf = 0, hidden = false;
+    const TWO = Math.PI * 2;
+    const COLS = ['rgba(106,208,255,A)', 'rgba(232,200,122,A)', 'rgba(150,170,240,A)'];
+    const rnd = (a, b) => a + Math.random() * (b - a);
+
+    function build() {
+      DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+      W = window.innerWidth; H = window.innerHeight;
+      cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      const count = Math.min(24, Math.max(9, Math.round(W * H / 92000)));
+      motifs = [];
+      for (let i = 0; i < count; i++) {
+        motifs.push({
+          x: rnd(0.03, 0.97) * W, y: rnd(0.04, 0.96) * H,
+          r: rnd(15, 54),
+          sides: [3, 4, 6, 6, 8, 12][(Math.random() * 6) | 0],
+          type: (Math.random() * 5) | 0,   // 0:多角形 1:入れ子 2:軌道 3:放射星 4:同心
+          rot: rnd(0, TWO), spin: rnd(-0.22, 0.22),
+          pulse: rnd(0.25, 0.75), phase: rnd(0, TWO),
+          col: COLS[(Math.random() * COLS.length) | 0],
+          baseA: rnd(0.10, 0.28)
+        });
+      }
+    }
+    function poly(cx, cy, r, sides, rot) {
+      ctx.beginPath();
+      for (let j = 0; j <= sides; j++) {
+        const a = rot + (j / sides) * TWO;
+        const px = cx + r * Math.cos(a), py = cy + r * Math.sin(a);
+        if (j === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+    }
+    function drawShape(m, rot, t) {
+      if (m.type === 0) {                                // 多角形
+        poly(m.x, m.y, m.r, m.sides, rot);
+      } else if (m.type === 1) {                         // 入れ子（逆回転）
+        poly(m.x, m.y, m.r, m.sides, rot);
+        poly(m.x, m.y, m.r * 0.58, m.sides, -rot * 1.3);
+      } else if (m.type === 2) {                         // 軌道（円＋周回点）
+        poly(m.x, m.y, m.r, 40, 0);
+        const oa = t * 0.7 + m.phase;
+        ctx.beginPath(); ctx.arc(m.x + m.r * Math.cos(oa), m.y + m.r * Math.sin(oa), 2.4, 0, TWO); ctx.fill();
+      } else if (m.type === 3) {                         // 放射星
+        for (let k = 0; k < m.sides; k++) {
+          const a2 = rot + (k / m.sides) * TWO;
+          ctx.beginPath(); ctx.moveTo(m.x, m.y);
+          ctx.lineTo(m.x + m.r * Math.cos(a2), m.y + m.r * Math.sin(a2)); ctx.stroke();
+        }
+        ctx.beginPath(); ctx.arc(m.x, m.y, 2, 0, TWO); ctx.fill();
+      } else {                                           // 同心多角形
+        poly(m.x, m.y, m.r, m.sides, rot);
+        poly(m.x, m.y, m.r * 0.66, m.sides, rot);
+        poly(m.x, m.y, m.r * 0.33, m.sides, rot);
+      }
+    }
+    function draw(now) {
+      raf = 0;
+      const t = now / 1000;
+      ctx.clearRect(0, 0, W, H);
+      ctx.globalCompositeOperation = 'lighter';
+      for (const m of motifs) {
+        const a = m.baseA * (0.6 + 0.4 * Math.sin(t * m.pulse + m.phase));
+        const rot = m.rot + t * m.spin;
+        // グロー（淡く太い）
+        const cg = m.col.replace('A', (a * 0.5).toFixed(3));
+        ctx.strokeStyle = cg; ctx.fillStyle = cg; ctx.lineWidth = 3;
+        drawShape(m, rot, t);
+        // 芯（鮮明・細い）
+        const cc = m.col.replace('A', a.toFixed(3));
+        ctx.strokeStyle = cc; ctx.fillStyle = cc; ctx.lineWidth = 1;
+        drawShape(m, rot, t);
+      }
+      if (!hidden && !reduce) raf = requestAnimationFrame(draw);
+    }
+    function start() { if (!raf && !reduce) raf = requestAnimationFrame(draw); }
+    function stop() { if (raf) { cancelAnimationFrame(raf); raf = 0; } }
+
+    build();
+    if (reduce) draw(0); else start();
+    let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { build(); if (!reduce) { stop(); start(); } }, 200); });
+    document.addEventListener('visibilitychange', () => { hidden = document.hidden; if (hidden) stop(); else start(); });
+  })();
+
+  /* ═══ ヒーロー幾何学（音→模様）— 可視時のみ ═══ */
   (function () {
     const cv = document.getElementById('art');
     const ctx = cv.getContext('2d');
@@ -402,7 +489,7 @@
 
     function loop(now) {
       raf = 0;
-      if (now - last >= 33) { last = now; drawFrame(now); }   // ~30fps
+      drawFrame(now);                                   // 可視時はフルFPSで滑らかに
       if (visible && !reduce) raf = requestAnimationFrame(loop);
     }
     function start() { if (!raf && !reduce) raf = requestAnimationFrame(loop); }
