@@ -501,20 +501,18 @@
     if (reduce) return;
     const heroInner = document.getElementById('heroInner');
     const art = document.getElementById('art');
-    const stars = document.getElementById('stars');
-    const nebula = document.getElementById('nebula');
     let ticking = false;
     function update() {
       ticking = false;
       const y = window.scrollY, vh = window.innerHeight;
+      // 視差はヒーロー内要素のみ。固定背景(星/ネビュラ)は動かさない
+      // （動かすとビューポート上端に隙間ができ、黒い帯として見えてしまう）
       if (y < vh * 1.4) {
         const f = Math.min(1, y / (vh * 0.85));
         heroInner.style.transform = `translateY(${y * 0.32}px)`;
         heroInner.style.opacity = String(1 - f * 0.95);
         art.style.transform = `translateY(${y * 0.14}px) scale(${1 + y * 0.00018})`;
       }
-      stars.style.transform = `translateY(${y * 0.05}px)`;
-      nebula.style.transform = `translateY(${y * 0.025}px)`;
     }
     window.addEventListener('scroll', () => {
       if (!ticking) { ticking = true; requestAnimationFrame(update); }
