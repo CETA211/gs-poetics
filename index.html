@@ -74,7 +74,9 @@
         linear-gradient(180deg, #05060e 0%, #04050b 55%, #03040a 100%);
       will-change: transform;
     }
-    #stars { position: fixed; inset: 0; z-index: -3; pointer-events: none;
+    /* 上下に 340px ずつ余白を持たせて配置（視差で動かしても上端に隙間が出ないように） */
+    #stars { position: fixed; left: 0; right: 0; top: -340px; height: calc(100% + 680px);
+      z-index: -3; pointer-events: none;
       animation: twinkle 7s ease-in-out infinite; will-change: transform, opacity; }
     @keyframes twinkle { 0%,100% { opacity:.82 } 50% { opacity:1 } }
     /* 宇宙的幾何学模様の散布レイヤー（全面・高FPS） */
@@ -304,11 +306,12 @@
     let DPR = 1;
     function draw() {
       DPR = Math.min(window.devicePixelRatio || 1, 1.5);
-      const w = window.innerWidth, h = window.innerHeight;
+      const M = 340;                                       // CSS の top:-340 / +680 に対応
+      const w = window.innerWidth, h = window.innerHeight + M * 2;
       cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR);
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       ctx.clearRect(0, 0, w, h);
-      const n = Math.min(440, Math.round(w * h / 6000));
+      const n = Math.min(560, Math.round(w * h / 6000));
       for (let i = 0; i < n; i++) {
         const x = Math.random() * w, y = Math.random() * h;
         const r = Math.random() * 1.1 + 0.25;
@@ -501,18 +504,20 @@
     if (reduce) return;
     const heroInner = document.getElementById('heroInner');
     const art = document.getElementById('art');
+    const stars = document.getElementById('stars');
     let ticking = false;
     function update() {
       ticking = false;
       const y = window.scrollY, vh = window.innerHeight;
-      // 視差はヒーロー内要素のみ。固定背景(星/ネビュラ)は動かさない
-      // （動かすとビューポート上端に隙間ができ、黒い帯として見えてしまう）
       if (y < vh * 1.4) {
         const f = Math.min(1, y / (vh * 0.85));
         heroInner.style.transform = `translateY(${y * 0.32}px)`;
         heroInner.style.opacity = String(1 - f * 0.95);
         art.style.transform = `translateY(${y * 0.14}px) scale(${1 + y * 0.00018})`;
       }
+      // 星空は視差で動かす（上下±340px余白＋移動量上限300pxで上端に隙間は出ない）。
+      // 色の土台ネビュラは固定のまま背面を常時被覆するので黒帯は出ない。
+      stars.style.transform = `translateY(${Math.min(300, y * 0.06)}px)`;
     }
     window.addEventListener('scroll', () => {
       if (!ticking) { ticking = true; requestAnimationFrame(update); }
