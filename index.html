@@ -65,35 +65,20 @@
     }
 
     /* ════════ 宇宙の背景（固定・多層） ════════ */
-    .bg-space { position: fixed; inset: 0; z-index: -4; pointer-events: none;
-      background:
-        radial-gradient(38% 30% at 18% 12%, rgba(58,72,150,.34), transparent 70%),
-        radial-gradient(32% 26% at 84% 22%, rgba(120,70,150,.22), transparent 72%),
-        radial-gradient(40% 34% at 70% 78%, rgba(40,110,140,.20), transparent 72%),
-        radial-gradient(50% 60% at 50% 6%, rgba(20,28,60,.5), transparent 70%),
-        linear-gradient(180deg, #05060e 0%, #04050b 55%, #03040a 100%);
-      will-change: transform;
+    /* 色の土台（固定・常時全面被覆＝黒帯防止）。ネビュラ/星/天の川は #stars キャンバスが描く */
+    .bg-space { position: fixed; inset: 0; z-index: -5; pointer-events: none;
+      background: radial-gradient(150% 100% at 50% -8%, #0b1126 0%, #070a18 38%, #04050d 72%, #03040a 100%);
     }
     /* 上下に 340px ずつ余白を持たせて配置（視差で動かしても上端に隙間が出ないように） */
     #stars { position: fixed; left: 0; right: 0; top: -340px; height: calc(100% + 680px);
-      z-index: -3; pointer-events: none;
-      animation: twinkle 7s ease-in-out infinite; will-change: transform, opacity; }
-    @keyframes twinkle { 0%,100% { opacity:.82 } 50% { opacity:1 } }
+      z-index: -4; pointer-events: none;
+      animation: twinkle 8s ease-in-out infinite; will-change: transform, opacity; }
+    @keyframes twinkle { 0%,100% { opacity:.93 } 50% { opacity:1 } }
     /* 宇宙的幾何学模様の散布レイヤー（全面・高FPS） */
     #geo { position: fixed; inset: 0; z-index: -2; pointer-events: none; will-change: transform; }
 
-    /* 地球の地平線（GeoSpace） — 大気リムをもつ惑星の縁 */
-    /* 地球の地平線：直径は横幅基準でも、縁(リム)は calc で常に画面下から 34vh に固定（横長PCでも破綻しない） */
-    .earth { position: fixed; left: 50%; transform: translateX(-50%);
-      width: 200vw; height: 200vw; max-width: 2600px; max-height: 2600px;
-      border-radius: 50%; z-index: -3; pointer-events: none;
-      bottom: calc(34vh - min(200vw, 2600px));
-      background: radial-gradient(circle at 50% 20%, #16244e 0%, #0a1228 32%, #05060e 58%);
-      box-shadow: inset 0 4px 60px rgba(8,12,30,.9);
-    }
-    .earth::before { content:""; position:absolute; inset:-3px; border-radius:50%;
-      background: radial-gradient(circle at 50% 15%, rgba(120,205,255,.22), rgba(120,205,255,.04) 20%, transparent 30%);
-      filter: blur(8px); }
+    /* 地球（GeoSpace）：軌道から見た縁。大気の輝線・テルミネーター・大気光を canvas で描画 */
+    #earth { position: fixed; inset: 0; z-index: -3; pointer-events: none; }
 
     /* ════════ Hero ════════ */
     .hero { position: relative; min-height: 100svh; display: flex;
@@ -215,8 +200,8 @@
 
   <div class="bg-space" id="nebula"></div>
   <canvas id="stars" aria-hidden="true"></canvas>
+  <canvas id="earth" aria-hidden="true"></canvas>
   <canvas id="geo" aria-hidden="true"></canvas>
-  <div class="earth" aria-hidden="true"></div>
 
   <!-- ════════ HERO ════════ -->
   <header class="hero">
@@ -299,7 +284,7 @@
   </footer>
 
   <script>
-  /* ═══ 星空（静的に1回描画・CSSで微かに瞬く） ═══ */
+  /* ═══ 深宇宙：ネビュラ雲＋天の川＋星（静的1回描画・読込ごとに生成） ═══ */
   (function () {
     const cv = document.getElementById('stars');
     const ctx = cv.getContext('2d');
@@ -311,25 +296,160 @@
       cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR);
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       ctx.clearRect(0, 0, w, h);
-      const n = Math.min(560, Math.round(w * h / 6000));
+      const rnd = (a, b) => a + Math.random() * (b - a);
+
+      // 1) ネビュラ雲：層状の wispy なガス雲（柔らかい放射状を多数加算）
+      ctx.globalCompositeOperation = 'lighter';
+      const palette = [[70, 90, 180], [120, 70, 160], [40, 120, 140], [150, 80, 120]];
+      for (let c = 0; c < 5; c++) {
+        const col = palette[(Math.random() * palette.length) | 0];
+        const cxp = rnd(0.05, 0.95) * w, cyp = rnd(0.05, 0.85) * h;
+        const spread = rnd(0.18, 0.34) * Math.min(w, h);
+        for (let p = 0; p < 14; p++) {
+          const ang = rnd(0, 6.283), dist = Math.pow(Math.random(), 0.6) * spread;
+          const px = cxp + Math.cos(ang) * dist * 1.3, py = cyp + Math.sin(ang) * dist;
+          const rr = rnd(0.4, 1.0) * spread * 0.6, aa = rnd(0.012, 0.05);
+          const g = ctx.createRadialGradient(px, py, 0, px, py, rr);
+          g.addColorStop(0, `rgba(${col[0]},${col[1]},${col[2]},${aa})`);
+          g.addColorStop(1, `rgba(${col[0]},${col[1]},${col[2]},0)`);
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, rr, 0, 6.283); ctx.fill();
+        }
+      }
+
+      // 2) 天の川：淡い斜めのヘイズ＋帯沿いに密集する微星
+      ctx.save();
+      ctx.translate(w * 0.5, h * 0.42); ctx.rotate(rnd(-0.5, -0.2));
+      const bandLen = Math.hypot(w, h), bandW = rnd(0.13, 0.20) * h;
+      const mg = ctx.createLinearGradient(0, -bandW, 0, bandW);
+      mg.addColorStop(0, 'rgba(120,140,200,0)');
+      mg.addColorStop(0.5, 'rgba(140,150,210,0.05)');
+      mg.addColorStop(1, 'rgba(120,140,200,0)');
+      ctx.fillStyle = mg; ctx.fillRect(-bandLen, -bandW, bandLen * 2, bandW * 2);
+      for (let i = 0; i < 220; i++) {
+        const bx = rnd(-bandLen * 0.5, bandLen * 0.5);
+        const by = (Math.random() + Math.random() - 1) * bandW;   // 中央寄り
+        const a = rnd(0.1, 0.5), r = rnd(0.2, 0.7);
+        ctx.fillStyle = `rgba(${210 + rnd(0, 45) | 0},${220 + rnd(0, 35) | 0},255,${a})`;
+        ctx.beginPath(); ctx.arc(bx, by, r, 0, 6.283); ctx.fill();
+      }
+      ctx.restore();
+
+      // 3) 星：明るさは指数分布（多数は微光・少数が明るい）、色温度をリアルに
+      const n = Math.min(640, Math.round(w * h / 5200));
       for (let i = 0; i < n; i++) {
         const x = Math.random() * w, y = Math.random() * h;
-        const r = Math.random() * 1.1 + 0.25;
-        const a = Math.random() * 0.6 + 0.2;
-        const tint = Math.random();
+        const b = Math.pow(Math.random(), 2.4);
+        const r = 0.25 + b * 1.4, a = 0.25 + b * 0.7, tt = Math.random();
+        let col;
+        if (tt > 0.92) col = `rgba(255,${190 + rnd(0, 30) | 0},${150 + rnd(0, 30) | 0},${a})`;  // 橙
+        else if (tt > 0.78) col = `rgba(255,240,${210 + rnd(0, 30) | 0},${a})`;                 // 黄白
+        else if (tt > 0.45) col = `rgba(${200 + rnd(0, 40) | 0},220,255,${a})`;                 // 青白
+        else col = `rgba(255,255,255,${a})`;                                                    // 白
+        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill();
+      }
+
+      // 4) 輝星：グロー＋4本の回折スパイク
+      const bright = Math.max(3, Math.round(w * h / 120000));
+      for (let i = 0; i < bright; i++) {
+        const x = Math.random() * w, y = Math.random() * h, R = rnd(6, 12);
+        const g = ctx.createRadialGradient(x, y, 0, x, y, R);
+        g.addColorStop(0, 'rgba(210,230,255,0.9)');
+        g.addColorStop(0.4, 'rgba(180,210,255,0.25)');
+        g.addColorStop(1, 'rgba(180,210,255,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, R, 0, 6.283); ctx.fill();
+        ctx.strokeStyle = 'rgba(200,225,255,0.5)'; ctx.lineWidth = 0.7;
+        const L = R * 2.4;
         ctx.beginPath();
-        ctx.fillStyle = tint > 0.85 ? `rgba(232,200,122,${a})`
-                      : tint > 0.6 ? `rgba(150,210,255,${a})`
-                      : `rgba(255,255,255,${a})`;
-        ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.moveTo(x - L, y); ctx.lineTo(x + L, y); ctx.moveTo(x, y - L); ctx.lineTo(x, y + L); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.beginPath(); ctx.arc(x, y, 1.1, 0, 6.283); ctx.fill();
       }
-      // 少数の明るい星に十字グロー
-      for (let i = 0; i < 7; i++) {
-        const x = Math.random() * w, y = Math.random() * h * 0.7;
-        const g = ctx.createRadialGradient(x, y, 0, x, y, 7);
-        g.addColorStop(0, 'rgba(180,225,255,.9)'); g.addColorStop(1, 'rgba(180,225,255,0)');
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+    }
+    draw();
+    let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(draw, 200); });
+  })();
+
+  /* ═══ 地球：軌道から見た縁（大気の輝線・テルミネーター・大気光） 静的1回描画 ═══ */
+  (function () {
+    const cv = document.getElementById('earth');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    let DPR = 1;
+    function draw() {
+      DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+      const W = window.innerWidth, H = window.innerHeight;
+      cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      const rnd = (a, b) => a + Math.random() * (b - a);
+
+      // 球の幾何：縁(リム)を画面下から limbH に置く。半径は大きく＝緩い曲率
+      const limbH = Math.min(H * 0.32, 300 + H * 0.10);
+      const R = Math.max(W, H) * rnd(1.5, 1.75);
+      const cx = W * 0.5 + rnd(-0.04, 0.04) * W;
+      const cy = (H - limbH) + R;
+      const limbY = cy - R;
+
+      // 太陽（昼側）：上方やや左。画面座標(yは下が＋)の単位ベクトル
+      const sun = rnd(-0.85, -0.55) * Math.PI;
+      const lx = Math.cos(sun), ly = Math.sin(sun);
+      const litX = cx + lx * R * 0.7, litY = cy + ly * R * 0.7;
+
+      // 外側の大気光（空へにじむ青いハロー）
+      ctx.globalCompositeOperation = 'lighter';
+      const glowW = Math.min(W, H) * 0.17;
+      const og = ctx.createRadialGradient(cx, cy, R, cx, cy, R + glowW);
+      og.addColorStop(0, 'rgba(90,170,255,0.5)');
+      og.addColorStop(0.4, 'rgba(70,140,235,0.17)');
+      og.addColorStop(1, 'rgba(60,120,220,0)');
+      ctx.fillStyle = og; ctx.beginPath(); ctx.arc(cx, cy, R + glowW, 0, 6.283); ctx.fill();
+
+      // 惑星本体（球内にクリップ）
+      ctx.save();
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, 6.283); ctx.clip();
+
+      // 1) 基本シェーディング：昼側(明) → 夜側(暗)
+      ctx.globalCompositeOperation = 'source-over';
+      const bg = ctx.createRadialGradient(litX, litY, R * 0.1, litX, litY, R * 1.5);
+      bg.addColorStop(0, '#1a5ea6'); bg.addColorStop(0.32, '#0b3a72');
+      bg.addColorStop(0.6, '#072145'); bg.addColorStop(0.85, '#03101f'); bg.addColorStop(1, '#01060e');
+      ctx.fillStyle = bg; ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+
+      // 2) 海の濃淡・大陸・雲の暗示（昼側のみ、見える上部に集中）
+      for (let i = 0; i < 30; i++) {
+        const px = cx + rnd(-0.92, 0.92) * R;
+        const py = limbY + Math.pow(Math.random(), 1.5) * limbH * 1.5;
+        const nx = (px - cx) / R, ny = (py - cy) / R;
+        const lit = nx * lx + ny * ly;
+        if (lit < 0.06) continue;
+        const rr = rnd(0.05, 0.16) * R, k = Math.random(), al = (0.05 + 0.10 * lit);
+        let col;
+        if (k > 0.6) col = `rgba(190,210,230,${al.toFixed(3)})`;        // 雲
+        else if (k > 0.32) col = `rgba(45,100,80,${al.toFixed(3)})`;    // 陸
+        else col = `rgba(20,75,135,${al.toFixed(3)})`;                  // 深い海
+        const g = ctx.createRadialGradient(px, py, 0, px, py, rr);
+        g.addColorStop(0, col); g.addColorStop(1, col.replace(/[\d.]+\)$/, '0)'));
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, rr, 0, 6.283); ctx.fill();
       }
+
+      // 3) 内側の大気リム（縁の内側を青く光らせる＝Rayleigh散乱）
+      ctx.globalCompositeOperation = 'lighter';
+      const rim = ctx.createRadialGradient(cx, cy, R * 0.9, cx, cy, R);
+      rim.addColorStop(0, 'rgba(80,160,255,0)');
+      rim.addColorStop(0.88, 'rgba(90,170,255,0)');
+      rim.addColorStop(0.965, 'rgba(150,205,255,0.55)');
+      rim.addColorStop(1, 'rgba(205,232,255,0.9)');
+      ctx.fillStyle = rim; ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+
+      // 4) 夜側の減光（テルミネーターを締める）
+      ctx.globalCompositeOperation = 'source-over';
+      const term = ctx.createRadialGradient(litX, litY, R * 0.45, litX, litY, R * 1.7);
+      term.addColorStop(0, 'rgba(0,0,0,0)');
+      term.addColorStop(1, 'rgba(1,3,9,0.88)');
+      ctx.fillStyle = term; ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+
+      ctx.restore();
+      ctx.globalCompositeOperation = 'source-over';
     }
     draw();
     let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(draw, 200); });
