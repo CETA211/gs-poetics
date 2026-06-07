@@ -88,9 +88,9 @@
       background: radial-gradient(120% 120% at 50% 50%, transparent 52%, rgba(4,5,11,.9) 100%); }
 
     .hero-inner { position: relative; z-index: 2; text-align: center; padding: 40px 24px; }
-    .hero-inner::before { content:""; position:absolute; inset:-55% -40%; z-index:-1;
-      background: radial-gradient(ellipse 60% 64% at 50% 50%, rgba(3,4,10,.95), rgba(3,4,10,.80) 38%, rgba(3,4,10,.42) 60%, transparent 80%);
-      filter: blur(16px); }
+    .hero-inner::before { content:""; position:absolute; inset:-32% -26%; z-index:-1;
+      background: radial-gradient(ellipse 54% 56% at 50% 50%, rgba(3,4,10,.78), rgba(3,4,10,.4) 46%, transparent 72%);
+      filter: blur(12px); }
 
     .hero-mark { font-family: 'Cormorant Garamond', serif; font-weight: 400;
       font-size: clamp(3rem, 11vw, 7.6rem); line-height: 1; letter-spacing: .035em;
@@ -373,24 +373,24 @@
 
       // 5) 幾何学ネットワーク：近接する星をうっすら結び、星座的な幾何を付与
       const nodes = [];
-      const nodeN = Math.max(12, Math.round(w * h / 75000));
+      const nodeN = Math.max(16, Math.round(w * h / 50000));
       for (let i = 0; i < nodeN; i++) nodes.push({ x: Math.random() * w, y: Math.random() * h });
-      ctx.lineWidth = 0.6;
+      ctx.lineWidth = 0.65;
       for (let i = 0; i < nodes.length; i++) {
         const a = nodes[i];
         const near = nodes.map((b, j) => ({ j, d: (b.x - a.x) ** 2 + (b.y - a.y) ** 2 }))
-          .sort((p, q) => p.d - q.d).slice(1, 3);
+          .sort((p, q) => p.d - q.d).slice(1, 4);   // 近接3本を結ぶ＝三角形状の幾何が増える
         for (const nb of near) {
           const b = nodes[nb.j];
           const lg = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-          lg.addColorStop(0, 'rgba(140,175,235,0.16)');
-          lg.addColorStop(0.5, 'rgba(120,160,225,0.05)');
-          lg.addColorStop(1, 'rgba(140,175,235,0.16)');
+          lg.addColorStop(0, 'rgba(145,180,240,0.22)');
+          lg.addColorStop(0.5, 'rgba(125,165,230,0.07)');
+          lg.addColorStop(1, 'rgba(145,180,240,0.22)');
           ctx.strokeStyle = lg;
           ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
         }
-        ctx.fillStyle = 'rgba(180,205,255,0.5)';
-        ctx.beginPath(); ctx.arc(a.x, a.y, 1.1, 0, 6.283); ctx.fill();
+        ctx.fillStyle = 'rgba(185,210,255,0.6)';
+        ctx.beginPath(); ctx.arc(a.x, a.y, 1.2, 0, 6.283); ctx.fill();
       }
       ctx.globalCompositeOperation = 'source-over';
     }
@@ -428,8 +428,8 @@
       ctx.globalCompositeOperation = 'lighter';
       const glowW = Math.min(W, H) * 0.17;
       const og = ctx.createRadialGradient(cx, cy, R, cx, cy, R + glowW);
-      og.addColorStop(0, 'rgba(90,170,255,0.5)');
-      og.addColorStop(0.4, 'rgba(70,140,235,0.17)');
+      og.addColorStop(0, 'rgba(90,170,255,0.4)');
+      og.addColorStop(0.4, 'rgba(70,140,235,0.14)');
       og.addColorStop(1, 'rgba(60,120,220,0)');
       ctx.fillStyle = og; ctx.beginPath(); ctx.arc(cx, cy, R + glowW, 0, 6.283); ctx.fill();
 
@@ -444,60 +444,18 @@
       bg.addColorStop(0.6, '#072145'); bg.addColorStop(0.85, '#03101f'); bg.addColorStop(1, '#01060e');
       ctx.fillStyle = bg; ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
 
-      // 2) 大陸（緑〜褐色の陸塊）— 昼側に、見える帯へ集中。クラスタで塊感を出す
-      const fade = (c, a) => c.replace(/[\d.]+\)$/, a.toFixed(3) + ')');
-      const l1 = limbY;
-      for (let cluster = 0; cluster < 6; cluster++) {
-        const cax = cx + rnd(-0.82, 0.82) * R;
-        const cay = l1 + Math.pow(Math.random(), 1.25) * limbH * 1.7;
-        const lit0 = ((cax - cx) / R) * lx + ((cay - cy) / R) * ly;
-        if (lit0 < 0.14) continue;                          // 夜側は陸を描かない
-        const csize = rnd(0.09, 0.19) * R;
-        const green = Math.random() > 0.32;                 // 大半は緑の植生
-        const parts = 7 + (Math.random() * 6 | 0);
-        for (let p = 0; p < parts; p++) {
-          const px = cax + rnd(-1, 1) * csize * 1.1, py = cay + rnd(-0.7, 0.7) * csize;
-          const nx = (px - cx) / R, ny = (py - cy) / R, lit = nx * lx + ny * ly;
-          if (lit < 0.1) continue;
-          const rr = rnd(0.28, 0.72) * csize, al = 0.22 + 0.4 * lit;
-          const base = green
-            ? `rgba(${48 + (rnd(0, 30) | 0)},${118 + (rnd(0, 50) | 0)},${58 + (rnd(0, 28) | 0)},${al.toFixed(3)})`   // 植生(緑)
-            : `rgba(${120 + (rnd(0, 45) | 0)},${100 + (rnd(0, 30) | 0)},${58 + (rnd(0, 25) | 0)},${al.toFixed(3)})`; // 砂漠/岩(褐)
-          const g = ctx.createRadialGradient(px, py, 0, px, py, rr);
-          g.addColorStop(0, base);
-          g.addColorStop(0.65, fade(base, al * 0.5));
-          g.addColorStop(1, fade(base, 0));
-          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, rr, 0, 6.283); ctx.fill();
-        }
-      }
+      // （シンプル版：大陸・雲は描かない。海の球体＋大気リム＋陰影のみで気持ち悪さを排除）
 
-      // 3) 雲（白い渦）— 昼側に浮かべる
-      for (let i = 0; i < 16; i++) {
-        const px = cx + rnd(-0.94, 0.94) * R;
-        const py = l1 + Math.pow(Math.random(), 1.4) * limbH * 1.8;
-        const nx = (px - cx) / R, ny = (py - cy) / R, lit = nx * lx + ny * ly;
-        if (lit < 0.08) continue;
-        const rr = rnd(0.05, 0.13) * R, al = 0.10 + 0.22 * lit;
-        for (let q = 0; q < 3; q++) {                       // 数個重ねて渦状に
-          const ox = px + rnd(-1, 1) * rr * 1.2, oy = py + rnd(-0.4, 0.4) * rr;
-          const rq = rr * rnd(0.5, 0.95);
-          const g = ctx.createRadialGradient(ox, oy, 0, ox, oy, rq);
-          g.addColorStop(0, `rgba(232,240,250,${al.toFixed(3)})`);
-          g.addColorStop(1, 'rgba(232,240,250,0)');
-          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(ox, oy, rq, 0, 6.283); ctx.fill();
-        }
-      }
-
-      // 4) 内側の大気リム（縁の内側を青く光らせる＝Rayleigh散乱）
+      // 2) 内側の大気リム（縁の内側を青く光らせる＝Rayleigh散乱）
       ctx.globalCompositeOperation = 'lighter';
       const rim = ctx.createRadialGradient(cx, cy, R * 0.9, cx, cy, R);
       rim.addColorStop(0, 'rgba(80,160,255,0)');
-      rim.addColorStop(0.88, 'rgba(90,170,255,0)');
-      rim.addColorStop(0.965, 'rgba(150,205,255,0.55)');
-      rim.addColorStop(1, 'rgba(205,232,255,0.9)');
+      rim.addColorStop(0.9, 'rgba(90,170,255,0)');
+      rim.addColorStop(0.97, 'rgba(140,195,255,0.42)');
+      rim.addColorStop(1, 'rgba(200,228,255,0.72)');
       ctx.fillStyle = rim; ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
 
-      // 5) 夜側の減光（テルミネーターを締める）
+      // 3) 夜側の減光（テルミネーターを締める）
       ctx.globalCompositeOperation = 'source-over';
       const term = ctx.createRadialGradient(litX, litY, R * 0.45, litX, litY, R * 1.7);
       term.addColorStop(0, 'rgba(0,0,0,0)');
@@ -632,7 +590,7 @@
       const rot = time * 0.03;
       // 同心多角形リング（淡い）
       ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot * 0.5);
-      ctx.strokeStyle = 'rgba(42,58,110,.45)'; ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(72,104,175,.5)'; ctx.lineWidth = 1;
       for (let ring = 1; ring <= 3; ring++) {
         const rr = R * (0.95 + 0.28 * ring); ctx.beginPath();
         for (let j = 0; j <= SYM; j++) {
@@ -646,9 +604,9 @@
       const path = buildPath(time, R);
       for (let s = 0; s < SYM; s++) {
         ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot + (s / SYM) * TWO);
-        ctx.strokeStyle = 'rgba(106,208,255,.045)'; ctx.lineWidth = 4; ctx.stroke(path);
-        ctx.strokeStyle = (s % 4 === 0) ? 'rgba(232,200,122,.42)' : 'rgba(150,215,255,.34)';
-        ctx.lineWidth = 1; ctx.stroke(path);
+        ctx.strokeStyle = 'rgba(106,208,255,.07)'; ctx.lineWidth = 4.5; ctx.stroke(path);
+        ctx.strokeStyle = (s % 4 === 0) ? 'rgba(240,205,120,.62)' : 'rgba(150,215,255,.5)';
+        ctx.lineWidth = 1.1; ctx.stroke(path);
         ctx.restore();
       }
       // 中心核
