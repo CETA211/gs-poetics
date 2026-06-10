@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#04050b">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%2304050b'/><g fill='none' stroke='%236ad0ff' stroke-width='1.3'><circle cx='16' cy='16' r='9'/><polygon points='16,5 25,21 7,21'/></g><circle cx='16' cy='16' r='2.2' fill='%23e8c87a'/></svg>">
+  <title>声をひらく — Voice Keepsake | G.S. Poetics</title>
+  <meta name="description" content="受け取った「声のかたち」の画像をここにひらくと、封じられた声がそのまま蘇ります。すべて端末内で完結します。">
+
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://ceta211.github.io/gs-poetics/listen.html">
+  <meta property="og:title"       content="声をひらく — Voice Keepsake | G.S. Poetics">
+  <meta property="og:description" content="この画像には、声がはいっています。ここにひらくと、声が蘇ります。">
+  <meta property="og:image"       content="https://ceta211.github.io/gs-poetics/og.png">
+  <meta property="og:site_name"   content="G.S. Poetics">
+  <meta property="og:locale"      content="ja_JP">
+  <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:image"      content="https://ceta211.github.io/gs-poetics/og.png">
+  <link rel="canonical" href="https://ceta211.github.io/gs-poetics/listen.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Shippori+Mincho:wght@400;500;600&family=Noto+Sans+JP:wght@200;300;400&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --void:#04050b; --indigo:#2a3a6e; --cyan:#6ad0ff; --cyan-dim:#3a7fa8;
+      --gold:#e8c87a; --gold-dim:#9a8048; --paper:#f1eee7; --paper-d:#bdb9b0; --mute:#767a90;
+      --maxw:760px; --ease:cubic-bezier(.4,0,.2,1);
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--void); color: var(--paper);
+      font-family: 'Noto Sans JP', -apple-system, 'Segoe UI', sans-serif; font-weight: 300;
+      line-height: 1.95; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    ::selection { background: rgba(232,200,122,.3); color: #fff; }
+    :focus-visible { outline: 1px solid var(--gold); outline-offset: 3px; border-radius: 2px; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+    .bg-space { position: fixed; inset: 0; z-index: -3; pointer-events: none;
+      background: radial-gradient(150% 100% at 50% -8%, #0b1126 0%, #070a18 38%, #04050d 72%, #03040a 100%); }
+    #stars { position: fixed; inset: 0; z-index: -2; pointer-events: none; }
+
+    .page-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 26px; }
+    .back { font-size: .78rem; letter-spacing: .2em; color: var(--paper-d);
+      text-transform: uppercase; transition: color .4s var(--ease); }
+    .back:hover { color: var(--gold); }
+
+    .hero-s { text-align: center; padding: clamp(38px, 7vw, 70px) 0 clamp(22px, 4vw, 40px); }
+    .lab-tag { font-size: .7rem; letter-spacing: .34em; color: var(--gold); text-transform: uppercase; }
+    .hero-s h1 { margin-top: 14px; font-family: 'Shippori Mincho', serif; font-weight: 500;
+      font-size: clamp(1.9rem, 6vw, 3rem); letter-spacing: .14em;
+      text-shadow: 0 -1px 0 rgba(255,255,255,.18), 0 2px 4px rgba(0,0,0,.5), 0 6px 22px rgba(0,0,0,.6); }
+    .hero-s .en { display: block; font-family: 'Cormorant Garamond', serif; font-style: italic;
+      font-size: 1rem; letter-spacing: .2em; color: var(--gold); margin-top: 10px; font-weight: 400; }
+    .hero-s p.lead { margin: 22px auto 0; max-width: 38ch; color: var(--paper-d);
+      font-size: clamp(.95rem, 2.3vw, 1.05rem); }
+    .privacy { margin: 14px auto 0; text-align: center; font-size: .76rem; color: var(--mute); }
+    .privacy b { color: var(--cyan-dim); font-weight: 400; }
+
+    main { padding-bottom: 90px; }
+    .drop { margin-top: 26px; border: 1.5px dashed rgba(106,208,255,.3); border-radius: 16px;
+      padding: 58px 24px; text-align: center; cursor: pointer;
+      background: linear-gradient(160deg, rgba(14,18,38,.4), rgba(6,8,18,.3));
+      transition: border-color .4s var(--ease), background .4s var(--ease), transform .4s var(--ease); }
+    .drop:hover, .drop.over { border-color: rgba(232,200,122,.6); background: rgba(232,200,122,.05); }
+    .drop.over { transform: scale(1.012); }
+    .drop .d1 { font-family: 'Shippori Mincho', serif; font-size: 1.15rem; letter-spacing: .12em; }
+    .drop .d2 { font-size: .78rem; color: var(--mute); margin-top: 8px; }
+    .msg { margin-top: 16px; text-align: center; font-size: .84rem; color: #ffb3a0; min-height: 1.6em; }
+
+    /* ── ひらいた声（セレモニー） ── */
+    .opened { display: none; margin-top: 34px; text-align: center; }
+    .opened.show { display: block; animation: rise 1s var(--ease) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+    .frame { position: relative; width: min(520px, 92vw); margin: 0 auto; }
+    #openedImg { width: 100%; height: auto; display: block; border-radius: 14px;
+      box-shadow: 0 30px 90px -34px rgba(80,150,255,.45); }
+    #orbit { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .opened .label { margin-top: 26px; font-family: 'Shippori Mincho', serif; font-weight: 500;
+      font-size: clamp(1.1rem, 3.4vw, 1.5rem); letter-spacing: .12em; color: var(--paper); }
+    .opened .meta { margin-top: 6px; font-size: .8rem; color: var(--mute); letter-spacing: .08em; }
+    .btn { appearance: none; -webkit-appearance: none; border: 1px solid var(--gold);
+      background: var(--gold); color: var(--void); font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 300; font-size: .88rem; letter-spacing: .26em; text-indent: .26em;
+      padding: 15px 44px; border-radius: 999px; cursor: pointer; margin-top: 26px;
+      transition: background .4s var(--ease), box-shadow .4s var(--ease); }
+    .btn:hover { background: #f3d894; box-shadow: 0 0 32px -8px rgba(232,200,122,.7); }
+    .ptime { margin-top: 12px; font-family: 'Cormorant Garamond', serif; font-size: 1.05rem;
+      letter-spacing: .12em; color: var(--gold-dim); min-height: 1.5em; }
+    .again { display: inline-block; margin-top: 24px; font-size: .78rem; letter-spacing: .14em; color: var(--mute);
+      transition: color .4s var(--ease); cursor: pointer; background: none; border: none; font-family: inherit; }
+    .again:hover { color: var(--paper-d); }
+
+    .make { margin-top: 56px; text-align: center; font-size: .86rem; color: var(--paper-d); }
+    .make a { color: var(--gold); border-bottom: 1px solid rgba(232,200,122,.35); padding-bottom: 1px;
+      transition: border-color .4s var(--ease), text-shadow .4s var(--ease); }
+    .make a:hover { border-color: var(--gold); text-shadow: 0 0 16px rgba(232,200,122,.4); }
+
+    footer { padding: 56px 0 48px; text-align: center; border-top: 1px solid rgba(255,255,255,.06); }
+    footer .mark { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; letter-spacing: .1em; }
+    footer .mark .dot { color: var(--gold); }
+    footer .small { color: var(--mute); font-size: .74rem; letter-spacing: .18em; margin-top: 10px; text-transform: uppercase; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .opened.show { animation: none; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-space"></div>
+  <canvas id="stars" aria-hidden="true"></canvas>
+
+  <header class="page-head">
+    <a class="back" href="./">← G.S. Poetics</a>
+    <a class="back" href="voice.html">自分の声でつくる →</a>
+  </header>
+
+  <section class="hero-s">
+    <div class="wrap">
+      <span class="lab-tag">Lab 01 — Voice Keepsake</span>
+      <h1>声をひらく<span class="en">Open the voice within.</span></h1>
+      <p class="lead">受け取った「声のかたち」の画像を、ここにひらいてください。封じられた声が、そのまま蘇ります。</p>
+      <p class="privacy">🔒 <b>すべてこの端末の中だけ</b>で再生されます。画像も声も、どこにも送信されません。</p>
+    </div>
+  </section>
+
+  <main class="wrap">
+
+    <div class="drop" id="drop" role="button" tabindex="0" aria-label="声入りのPNG画像を選択、またはここにドロップ">
+      <div class="d1">画像を ここに ひらく</div>
+      <div class="d2">タップして選択、またはドラッグ＆ドロップ（PNG）</div>
+    </div>
+    <input type="file" id="fileIn" accept="image/png" hidden>
+    <p class="msg" id="openMsg" role="status"></p>
+
+    <div class="opened" id="opened">
+      <div class="frame">
+        <img id="openedImg" alt="ひらいた声のかたち">
+        <canvas id="orbit" aria-hidden="true"></canvas>
+      </div>
+      <div class="label" id="openedLabel"></div>
+      <div class="meta" id="openedMeta"></div>
+      <button class="btn" id="playBtn" type="button">▶ 声をきく</button>
+      <div class="ptime" id="ptime"></div>
+      <div><button class="again" id="againBtn" type="button">べつの画像をひらく</button></div>
+    </div>
+
+    <p class="make">あなたの声も、かたちにして贈れます —— <a href="voice.html">つくるページへ →</a></p>
+
+  </main>
+
+  <footer>
+    <div class="mark">G<span class="dot">.</span>S<span class="dot">.</span> Poetics</div>
+    <div class="small">Lab 01 · Voice Keepsake · all on-device</div>
+  </footer>
+
+  <script>
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ═══ 背景の星（静的・軽量） ═══ */
+  (function () {
+    const cv = $('stars'), ctx = cv.getContext('2d');
+    function draw() {
+      const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+      const w = window.innerWidth, h = window.innerHeight;
+      cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      const n = Math.min(300, Math.round(w * h / 8000));
+      for (let i = 0; i < n; i++) {
+        const b = Math.pow(Math.random(), 2.2);
+        const a = 0.2 + b * 0.6, t = Math.random();
+        ctx.fillStyle = t > 0.88 ? `rgba(232,200,122,${a})` : t > 0.55 ? `rgba(170,215,255,${a})` : `rgba(255,255,255,${a})`;
+        ctx.beginPath(); ctx.arc(Math.random() * w, Math.random() * h, 0.3 + b * 1.2, 0, 6.283); ctx.fill();
+      }
+    }
+    draw();
+    let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(draw, 200); });
+  })();
+
+  /* ═══ μ-law デコード ═══ */
+  function ulaw2lin(u) {
+    u = (~u) & 0xFF;
+    const sign = u & 0x80, exp = (u >> 4) & 7, mant = u & 0x0F;
+    let x = (((mant << 3) + 0x84) << exp) - 0x84;
+    return (sign ? -x : x) / 32768;
+  }
+
+  /* ═══ PNG チャンク抽出（voIc / GSPVOIC1） ═══ */
+  const CHUNK_TYPE = [0x76, 0x6F, 0x49, 0x63];
+  const MAGIC = [0x47, 0x53, 0x50, 0x56, 0x4F, 0x49, 0x43, 0x31];
+  function findChunk(bytes, type4) {
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let o = 8;
+    while (o + 12 <= bytes.length) {
+      const len = dv.getUint32(o);
+      if (bytes[o+4] === type4[0] && bytes[o+5] === type4[1] && bytes[o+6] === type4[2] && bytes[o+7] === type4[3]) return o;
+      o += 12 + len;
+    }
+    return -1;
+  }
+  function pngExtractVoice(bytes) {
+    if (bytes.length < 8 || bytes[0] !== 0x89 || bytes[1] !== 0x50 || bytes[2] !== 0x4E || bytes[3] !== 0x47) return null;
+    const o = findChunk(bytes, CHUNK_TYPE);
+    if (o < 0) return null;
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const len = dv.getUint32(o);
+    const d = bytes.subarray(o + 8, o + 8 + len);
+    for (let i = 0; i < MAGIC.length; i++) if (d[i] !== MAGIC[i]) return null;
+    const ddv = new DataView(d.buffer, d.byteOffset, d.byteLength);
+    const sr = ddv.getUint32(8), n = ddv.getUint32(12), ll = ddv.getUint16(16);
+    const label = new TextDecoder().decode(d.subarray(18, 18 + ll));
+    const ulaw = d.subarray(18 + ll, 18 + ll + n);
+    if (ulaw.length < n) return null;
+    const samples = new Float32Array(n);
+    for (let i = 0; i < n; i++) samples[i] = ulaw2lin(ulaw[i]);
+    return { sampleRate: sr, samples, label };
+  }
+
+  /* ═══ ひらく ═══ */
+  const drop = $('drop'), fileIn = $('fileIn'), openMsgEl = $('openMsg');
+  let opened = null;
+  function fmtT(s) { return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0'); }
+  function setOpenMsg(t) { openMsgEl.textContent = t || ''; }
+
+  async function handleFile(file) {
+    setOpenMsg('');
+    if (!file) return;
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const v = pngExtractVoice(bytes);
+      if (!v) {
+        setOpenMsg('この画像には声が見つかりませんでした。受け取った PNG を「ファイルのまま」（スクリーンショットや再保存をせずに）ひらいてください。');
+        return;
+      }
+      stopPlay();
+      opened = v;
+      const url = URL.createObjectURL(new Blob([bytes], { type: 'image/png' }));
+      const img = $('openedImg');
+      if (img.dataset.url) URL.revokeObjectURL(img.dataset.url);
+      img.src = url; img.dataset.url = url;
+      $('openedLabel').textContent = v.label || '';
+      const dur = v.samples.length / v.sampleRate;
+      $('openedMeta').textContent = `声の長さ ${fmtT(dur)}`;
+      $('ptime').textContent = '';
+      $('playBtn').textContent = '▶ 声をきく';
+      $('opened').classList.remove('show');
+      void $('opened').offsetWidth;             // アニメ再発火
+      $('opened').classList.add('show');
+      drop.style.display = 'none';
+      $('opened').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+    } catch (e) {
+      setOpenMsg('画像を読み込めませんでした。');
+    }
+  }
+  drop.addEventListener('click', () => fileIn.click());
+  drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileIn.click(); } });
+  fileIn.addEventListener('change', () => handleFile(fileIn.files[0]));
+  /* ページ全体でドロップを受ける */
+  ['dragover', 'dragenter'].forEach(ev => window.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave'].forEach(ev => window.addEventListener(ev, (e) => { if (!e.relatedTarget) drop.classList.remove('over'); }));
+  window.addEventListener('drop', (e) => {
+    e.preventDefault(); drop.classList.remove('over');
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) handleFile(f);
+  });
+
+  $('againBtn').addEventListener('click', () => {
+    stopPlay();
+    $('opened').classList.remove('show');
+    drop.style.display = '';
+    fileIn.value = '';
+    drop.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+  });
+
+  /* ═══ 再生 ＋ 声紋リング周回の金の光点 ═══ */
+  let playCtx = null, playSrc = null, playT0 = 0, playDur = 0, orbitRaf = 0;
+  function stopPlay() {
+    if (playSrc) { try { playSrc.stop(); } catch (e) {} playSrc = null; }
+    if (orbitRaf) { cancelAnimationFrame(orbitRaf); orbitRaf = 0; }
+    clearOrbit();
+    $('ptime').textContent = '';
+    $('playBtn').textContent = '▶ 声をきく';
+  }
+  function clearOrbit() {
+    const cv = $('orbit'), ctx = cv.getContext('2d');
+    ctx.clearRect(0, 0, cv.width, cv.height);
+  }
+  /* アートワークの幾何（renderArt と同じ比率）：
+     リング中心 = (0.5, 0.5 - 26/1080)、リング半径 ≒ 0.295 + 振幅の中庸 */
+  function drawOrbit(progress) {
+    const cv = $('orbit'), img = $('openedImg');
+    const DPR = Math.min(window.devicePixelRatio || 1, 2);
+    const w = img.clientWidth, h = img.clientHeight;
+    if (cv.width !== Math.round(w * DPR)) { cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR); }
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const cx = w * 0.5, cy = h * (0.5 - 26 / 1080), R = w * 0.318;
+    const a = progress * 2 * Math.PI - Math.PI / 2;
+    const x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R;
+    ctx.globalCompositeOperation = 'lighter';
+    /* 通過した弧 */
+    ctx.strokeStyle = 'rgba(232,200,122,.35)'; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.arc(cx, cy, R, -Math.PI / 2, a); ctx.stroke();
+    /* 光点 */
+    const g = ctx.createRadialGradient(x, y, 0, x, y, 10);
+    g.addColorStop(0, 'rgba(248,222,150,.95)'); g.addColorStop(1, 'rgba(232,200,122,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 10, 0, 6.283); ctx.fill();
+    ctx.fillStyle = 'rgba(255,246,222,.95)';
+    ctx.beginPath(); ctx.arc(x, y, 1.8, 0, 6.283); ctx.fill();
+  }
+  function orbitLoop() {
+    orbitRaf = 0;
+    if (!playSrc || !playCtx) return;
+    const el = Math.min(playDur, playCtx.currentTime - playT0);
+    $('ptime').textContent = fmtT(el) + ' / ' + fmtT(playDur);
+    if (!reduce) drawOrbit(el / playDur);
+    if (el < playDur) orbitRaf = requestAnimationFrame(orbitLoop);
+  }
+  $('playBtn').addEventListener('click', function () {
+    if (playSrc) { stopPlay(); return; }
+    if (!opened) return;
+    playCtx = playCtx || new AC();
+    if (playCtx.state === 'suspended') playCtx.resume();
+    const b = playCtx.createBuffer(1, opened.samples.length, opened.sampleRate);
+    b.getChannelData(0).set(opened.samples);
+    const s = playCtx.createBufferSource();
+    s.buffer = b; s.connect(playCtx.destination);
+    s.onended = () => { if (playSrc === s) { playSrc = null; stopPlay(); } };
+    playSrc = s; playDur = b.duration; playT0 = playCtx.currentTime;
+    s.start();
+    this.textContent = '■ とめる';
+    orbitLoop();
+  });
+  </script>
+
+</body>
+</html>

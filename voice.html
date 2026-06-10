@@ -106,18 +106,14 @@
     .caveat { font-size: .76rem; color: var(--mute); line-height: 1.9; }
     .caveat b { color: var(--paper-d); font-weight: 400; }
 
-    .drop { margin-top: 22px; border: 1.5px dashed rgba(106,208,255,.3); border-radius: 14px;
-      padding: 44px 24px; text-align: center; cursor: pointer;
-      transition: border-color .4s var(--ease), background .4s var(--ease); }
-    .drop:hover, .drop.over { border-color: rgba(232,200,122,.6); background: rgba(232,200,122,.04); }
-    .drop .d1 { font-family: 'Shippori Mincho', serif; font-size: 1.05rem; letter-spacing: .1em; }
-    .drop .d2 { font-size: .78rem; color: var(--mute); margin-top: 6px; }
-    .opened { margin-top: 22px; display: none; grid-template-columns: minmax(0,1fr) 250px; gap: 26px; align-items: start; }
-    .opened.show { display: grid; }
-    #openedImg { width: 100%; height: auto; display: block; border-radius: 12px;
-      box-shadow: 0 24px 70px -30px rgba(80,150,255,.35); }
-    .opened .meta { font-family: 'Shippori Mincho', serif; font-size: 1rem; color: var(--paper); min-height: 1.6em; }
-    .opened .meta2 { font-size: .8rem; color: var(--mute); }
+    .gift-url { margin-top: 20px; font-family: 'Cormorant Garamond', serif; font-size: 1.05rem;
+      letter-spacing: .04em; color: var(--cyan); background: rgba(4,5,11,.6);
+      border: 1px solid rgba(106,208,255,.22); border-radius: 8px; padding: 12px 16px;
+      word-break: break-all; user-select: all; }
+    .ln { color: var(--gold); border-bottom: 1px solid rgba(232,200,122,.35); padding-bottom: 1px;
+      transition: border-color .4s var(--ease), text-shadow .4s var(--ease); }
+    .ln:hover { border-color: var(--gold); text-shadow: 0 0 16px rgba(232,200,122,.4); }
+    .msg.ok { color: var(--cyan-dim); }
 
     footer { padding: 60px 0 50px; text-align: center; border-top: 1px solid rgba(255,255,255,.06); }
     footer .mark { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; letter-spacing: .1em; }
@@ -137,12 +133,13 @@
 
   <header class="page-head">
     <a class="back" href="./">← G.S. Poetics</a>
-    <span class="lab-tag">Lab 01 — Voice Keepsake</span>
+    <a class="back" href="listen.html">受け取った画像をひらく →</a>
   </header>
 
   <section class="hero-s">
     <div class="wrap">
-      <h1>声のかたち<span class="en">A voice, kept as geometry.</span></h1>
+      <span class="lab-tag">Lab 01 — Voice Keepsake</span>
+      <h1 style="margin-top:14px;">声のかたち<span class="en">A voice, kept as geometry.</span></h1>
       <p class="lead">声は、波。波は、かたち。あなたの声をひとつの図形に封じ、画像として贈る。受け取った人がその画像をこのページにひらけば、<span class="em">声がそのまま蘇る</span>。</p>
       <p class="privacy">🔒 録音も復元も、<b>すべてこの端末の中だけ</b>で完結します。音声がサーバーへ送られることはありません。</p>
     </div>
@@ -178,31 +175,23 @@
           </div>
           <button class="btn primary" id="saveBtn" type="button">⬇ 画像として保存</button>
           <button class="btn" id="againBtn" type="button">↺ 録りなおす</button>
-          <p class="caveat"><b>贈りかた:</b> 保存された PNG をそのまま送ってください。<b>スクリーンショットや、編集アプリでの再保存では声は失われます</b>（声は画像ファイルの中に封じられています）。</p>
+          <p class="caveat"><b>たいせつ:</b> 画像は<b>ファイルのまま</b>送ってください。スクリーンショットや編集アプリでの再保存では、封じた声は失われます。送りかたは下の 03 へ。</p>
         </div>
       </div>
     </section>
 
     <!-- STEP 3 -->
     <section class="step" id="step3">
-      <div class="s-head"><span class="num">03</span><h2>ひらく <span class="en2">Reopen</span></h2></div>
-      <p class="note">受け取った画像から、声を取り出す。</p>
-      <div class="drop" id="drop" role="button" tabindex="0" aria-label="声入りのPNG画像を選択または、ここにドロップ">
-        <div class="d1">画像を ここに ひらく</div>
-        <div class="d2">クリックして選択、またはドラッグ＆ドロップ（PNG）</div>
+      <div class="s-head"><span class="num">03</span><h2>贈る <span class="en2">Gift</span></h2></div>
+      <p class="note">保存した PNG を、ひらくページの URL とともに送る。それだけで届く。</p>
+      <div class="gift-url" id="giftUrl">https://ceta211.github.io/gs-poetics/listen.html</div>
+      <div class="btn-row">
+        <button class="btn" id="copyUrlBtn" type="button">URL をコピー</button>
+        <button class="btn" id="copyMsgBtn" type="button">そえる文面をコピー</button>
       </div>
-      <input type="file" id="fileIn" accept="image/png" hidden>
-      <div class="opened" id="opened">
-        <img id="openedImg" alt="ひらいた声のかたち">
-        <div class="art-side">
-          <div>
-            <div class="meta" id="openedLabel"></div>
-            <div class="meta2" id="openedMeta"></div>
-          </div>
-          <button class="btn primary" id="playBtn" type="button">▶ 声をきく</button>
-        </div>
-      </div>
-      <p class="msg" id="openMsg" role="status"></p>
+      <p class="caveat" style="margin-top:16px;">文面の例 ——「この画像には、声がはいっています。ひらきかた → （ひらくページのURL）。画像はファイルのまま送ります」</p>
+      <p class="msg" id="copyMsg" role="status"></p>
+      <p class="note" style="margin-top:18px;">受け取った画像をひらきたいときは → <a class="ln" href="listen.html">ひらくページへ</a></p>
     </section>
 
   </main>
@@ -253,12 +242,7 @@
     const mant = (x >> (exp + 3)) & 0x0F;
     return (~(sign | (exp << 4) | mant)) & 0xFF;
   }
-  function ulaw2lin(u) {
-    u = (~u) & 0xFF;
-    const sign = u & 0x80, exp = (u >> 4) & 7, mant = u & 0x0F;
-    let x = (((mant << 3) + 0x84) << exp) - 0x84;
-    return (sign ? -x : x) / 32768;
-  }
+  /* （復元側 ulaw2lin / pngExtractVoice は listen.html 側に実装） */
 
   /* ═══ PNG チャンク（CRC32 / 挿入 / 抽出） ═══ */
   const CRC_T = (() => {
@@ -309,24 +293,6 @@
     out.set(pngBytes.subarray(iend), iend + chunk.length);
     return out;
   }
-  function pngExtractVoice(bytes) {
-    if (bytes.length < 8 || bytes[0] !== 0x89 || bytes[1] !== 0x50 || bytes[2] !== 0x4E || bytes[3] !== 0x47) return null;
-    const o = findChunk(bytes, CHUNK_TYPE);
-    if (o < 0) return null;
-    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    const len = dv.getUint32(o);
-    const d = bytes.subarray(o + 8, o + 8 + len);
-    for (let i = 0; i < MAGIC.length; i++) if (d[i] !== MAGIC[i]) return null;
-    const ddv = new DataView(d.buffer, d.byteOffset, d.byteLength);
-    const sr = ddv.getUint32(8), n = ddv.getUint32(12), ll = ddv.getUint16(16);
-    const label = new TextDecoder().decode(d.subarray(18, 18 + ll));
-    const ulaw = d.subarray(18 + ll, 18 + ll + n);
-    if (ulaw.length < n) return null;
-    const samples = new Float32Array(n);
-    for (let i = 0; i < n; i++) samples[i] = ulaw2lin(ulaw[i]);
-    return { sampleRate: sr, samples, label };
-  }
-
   /* ═══ FFT（radix-2・スペクトル抽出用） ═══ */
   function fft(re, im) {
     const n = re.length;
@@ -689,41 +655,22 @@
     $('step1').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
-  /* ═══ ひらく（画像 → 声） ═══ */
-  const drop = $('drop'), fileIn = $('fileIn'), openMsgEl = $('openMsg');
-  let opened = null;
-  function setOpenMsg(t) { openMsgEl.textContent = t || ''; }
-  async function handleFile(file) {
-    setOpenMsg('');
-    if (!file) return;
-    try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const v = pngExtractVoice(bytes);
-      if (!v) { setOpenMsg('この画像には声が見つかりませんでした。保存した PNG をそのまま（再保存せずに）ひらいてください。'); return; }
-      opened = v;
-      const url = URL.createObjectURL(new Blob([bytes], { type: 'image/png' }));
-      const img = $('openedImg');
-      if (img.dataset.url) URL.revokeObjectURL(img.dataset.url);
-      img.src = url; img.dataset.url = url;
-      $('openedLabel').textContent = v.label || '（ことば は そえられていません）';
-      const dur = v.samples.length / v.sampleRate;
-      $('openedMeta').textContent = `声の長さ ${fmtT(dur)} ・ ${v.sampleRate / 1000} kHz`;
-      $('opened').classList.add('show');
-    } catch (e) {
-      setOpenMsg('画像を読み込めませんでした。');
-    }
+  /* ═══ 贈る（ひらくページの URL と文面のコピー） ═══ */
+  const LISTEN_URL = new URL('listen.html', location.href).href;
+  $('giftUrl').textContent = LISTEN_URL;
+  const copyMsgEl = $('copyMsg');
+  let copyTid = 0;
+  async function copyText(text, okMsg) {
+    let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {}
+    copyMsgEl.classList.toggle('ok', ok);
+    copyMsgEl.textContent = ok ? okMsg : 'コピーできませんでした。上の URL を選択して、手動でコピーしてください。';
+    clearTimeout(copyTid); copyTid = setTimeout(() => { copyMsgEl.textContent = ''; }, 4000);
   }
-  drop.addEventListener('click', () => fileIn.click());
-  drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileIn.click(); } });
-  fileIn.addEventListener('change', () => handleFile(fileIn.files[0]));
-  ['dragover', 'dragenter'].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
-  ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
-  drop.addEventListener('drop', (e) => { const f = e.dataTransfer.files && e.dataTransfer.files[0]; handleFile(f); });
-
-  $('playBtn').addEventListener('click', function () {
-    if (playSrc) { stopPlay(); this.textContent = '▶ 声をきく'; }
-    else if (opened) playSamples(opened.samples, opened.sampleRate, this, '▶ 声をきく');
-  });
+  $('copyUrlBtn').addEventListener('click', () => copyText(LISTEN_URL, 'URL をコピーしました。'));
+  $('copyMsgBtn').addEventListener('click', () =>
+    copyText(`この画像には、声がはいっています。\nひらきかた → ${LISTEN_URL}\n（画像は「ファイルのまま」送っています。スクリーンショットでは声が消えてしまうので、そのまま開いてね）`,
+      'そえる文面をコピーしました。画像と一緒に送ってください。'));
   </script>
 
 </body>
