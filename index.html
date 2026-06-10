@@ -18,9 +18,11 @@
   <meta property="og:image:height" content="630">
   <meta property="og:site_name"   content="G.S. Poetics">
   <meta property="og:locale"      content="ja_JP">
+  <meta property="og:image:alt"   content="深宇宙を背景に、12回対称のハーモノグラフ図形と G.S. Poetics のタイトル">
   <meta name="twitter:card"       content="summary_large_image">
   <meta name="twitter:title"      content="G.S. Poetics — 宇宙の波を、幾何学の詩へ">
   <meta name="twitter:description" content="音・光・波・幾何学を詩学へ翻訳するアートのリサーチ実践。">
+  <meta name="twitter:image"      content="https://ceta211.github.io/gs-poetics/og.png">
   <link rel="canonical" href="https://ceta211.github.io/gs-poetics/">
   <script type="application/ld+json">
   {
@@ -876,7 +878,11 @@
       '3:1': '完全十二度 — Perfect twelfth',  '4:1': '二オクターヴ — Double octave',
       '5:2': '長十度 — Major tenth',          '8:3': '完全十一度 — Perfect eleventh',
       '7:4': '自然七度 — Harmonic seventh',   '7:5': '三全音 — Septimal tritone',
-      '7:6': '七倍音の短三度 — Septimal minor third', '8:7': '七倍音の全音 — Septimal tone'
+      '7:6': '七倍音の短三度 — Septimal minor third', '8:7': '七倍音の全音 — Septimal tone',
+      '5:1': '長十七度 — Major seventeenth',  '6:1': '完全十九度 — Perfect nineteenth',
+      '7:1': '自然七度＋二オクターヴ — Harmonic seventh + 2 oct.',
+      '7:2': '自然七度＋オクターヴ — Harmonic seventh + octave',
+      '7:3': '七倍音の短十度 — Septimal minor tenth', '8:1': '三オクターヴ — Triple octave'
     };
     function gcd(x, y) { return y ? gcd(y, x % y) : x; }
     function ratio() {
@@ -965,7 +971,10 @@
       const { a, b } = ratio();
       rA.textContent = a; rB.textContent = b;
       const key = Math.max(a, b) + ':' + Math.min(a, b);
-      intervalEl.textContent = INTERVALS[key] || '高次の倍音比 — A higher harmonic';
+      const name = INTERVALS[key] || '高次の倍音比 — A higher harmonic';
+      intervalEl.textContent = name;
+      const vt = '比 ' + a + ' 対 ' + b + '（' + name + '）';
+      sA.setAttribute('aria-valuetext', vt); sB.setAttribute('aria-valuetext', vt);
     }
     function onInput() {
       updateInfo();
