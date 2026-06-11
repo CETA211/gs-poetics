@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#04050b">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%2304050b'/><g fill='none' stroke='%236ad0ff' stroke-width='1.3'><circle cx='16' cy='16' r='9'/><polygon points='16,5 25,21 7,21'/></g><circle cx='16' cy='16' r='2.2' fill='%23e8c87a'/></svg>">
+  <title>Sketches — 図形の素描 | G.S. Poetics</title>
+  <meta name="description" content="光・波・幾何学。3D空間に立ち上がる図形の素描たち。読み込むたびに違う表情を見せる、G.S. Poetics のライブスケッチ集。">
+
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://ceta211.github.io/gs-poetics/sketches.html">
+  <meta property="og:title"       content="Sketches — 図形の素描 | G.S. Poetics">
+  <meta property="og:description" content="光・波・幾何学。3D空間に立ち上がる、生きた図形の素描集。">
+  <meta property="og:image"       content="https://ceta211.github.io/gs-poetics/og.png">
+  <meta property="og:site_name"   content="G.S. Poetics">
+  <meta property="og:locale"      content="ja_JP">
+  <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:image"      content="https://ceta211.github.io/gs-poetics/og.png">
+  <link rel="canonical" href="https://ceta211.github.io/gs-poetics/sketches.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Shippori+Mincho:wght@400;500&family=Noto+Sans+JP:wght@200;300&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --void:#04050b; --cyan:#6ad0ff; --gold:#e8c87a; --paper:#f1eee7;
+      --paper-d:#bdb9b0; --mute:#767a90; --ease:cubic-bezier(.4,0,.2,1);
+    }
+    html, body { height: 100%; }
+    body { background: var(--void); color: var(--paper); overflow: hidden;
+      font-family: 'Noto Sans JP', sans-serif; font-weight: 300;
+      -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+
+    #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+    .vignette { position: fixed; inset: 0; pointer-events: none; z-index: 1;
+      background: radial-gradient(120% 120% at 50% 50%, transparent 55%, rgba(2,3,8,.66) 100%); }
+
+    .top { position: fixed; top: 0; left: 0; right: 0; z-index: 2;
+      display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; }
+    .back { font-size: .74rem; letter-spacing: .22em; color: var(--paper-d);
+      text-transform: uppercase; transition: color .4s var(--ease); text-shadow: 0 1px 8px rgba(0,0,0,.8); }
+    .back:hover { color: var(--gold); }
+    .fps { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: .92rem;
+      color: var(--mute); letter-spacing: .08em; text-shadow: 0 1px 8px rgba(0,0,0,.8); }
+
+    .hud { position: fixed; left: 0; right: 0; bottom: 0; z-index: 2;
+      display: flex; justify-content: space-between; align-items: flex-end; padding: 22px 26px;
+      pointer-events: none; }
+    .pname { pointer-events: auto; }
+    .pname .jp { display: block; font-family: 'Shippori Mincho', serif; font-weight: 500;
+      font-size: clamp(1.2rem, 3vw, 1.7rem); letter-spacing: .18em;
+      text-shadow: 0 2px 14px rgba(0,0,0,.85); }
+    .pname .en { display: block; font-family: 'Cormorant Garamond', serif; font-style: italic;
+      font-size: .95rem; letter-spacing: .14em; color: var(--gold); margin-top: 2px;
+      text-shadow: 0 2px 12px rgba(0,0,0,.8); }
+    .pctl { pointer-events: auto; display: flex; align-items: center; gap: 14px; }
+    .pbtn { appearance: none; border: 1px solid rgba(241,238,231,.25); background: rgba(4,5,11,.45);
+      color: var(--paper-d); width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+      font-size: 1.05rem; line-height: 1; backdrop-filter: blur(4px);
+      transition: border-color .35s var(--ease), color .35s var(--ease), box-shadow .35s var(--ease); }
+    .pbtn:hover { border-color: rgba(232,200,122,.65); color: var(--gold);
+      box-shadow: 0 0 22px -6px rgba(232,200,122,.55); }
+    .pidx { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--paper-d);
+      letter-spacing: .2em; min-width: 64px; text-align: center; text-shadow: 0 1px 8px rgba(0,0,0,.8); }
+    .hint { position: fixed; bottom: 86px; left: 50%; transform: translateX(-50%); z-index: 2;
+      font-size: .66rem; letter-spacing: .3em; color: var(--mute); text-transform: uppercase;
+      text-shadow: 0 1px 8px rgba(0,0,0,.8); pointer-events: none; opacity: .8; }
+    @media (max-width: 640px) { .hint { display: none; } .pidx { min-width: 48px; } }
+  </style>
+</head>
+<body>
+
+  <canvas id="scene" aria-label="光と波の3D幾何学アニメーション"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="back" href="./">← G.S. Poetics</a>
+    <span class="fps" id="fps"></span>
+  </header>
+
+  <div class="hint">← → でも切り替え ・ ⟳ で再生成</div>
+
+  <div class="hud">
+    <div class="pname">
+      <span class="jp" id="nameJp"></span>
+      <span class="en" id="nameEn"></span>
+    </div>
+    <div class="pctl">
+      <button class="pbtn" id="prevBtn" type="button" aria-label="前の素描へ">‹</button>
+      <span class="pidx" id="pidx"></span>
+      <button class="pbtn" id="nextBtn" type="button" aria-label="次の素描へ">›</button>
+      <button class="pbtn" id="reBtn" type="button" aria-label="この素描を再生成">⟳</button>
+    </div>
+  </div>
+
+  <script>
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const TWO = Math.PI * 2;
+  const rr = (a, b) => a + Math.random() * (b - a);
+  const pick = (arr) => arr[(Math.random() * arr.length) | 0];
+
+  const cv = $('scene'), ctx = cv.getContext('2d');
+  let W = 0, H = 0, DPR = 1, starCv = null;
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);     // 高解像度（Retina フル活用）
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    /* 静的な星层（毎フレーム drawImage するだけ＝安い） */
+    starCv = document.createElement('canvas');
+    starCv.width = cv.width; starCv.height = cv.height;
+    const sc = starCv.getContext('2d');
+    sc.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const n = Math.min(240, Math.round(W * H / 9500));
+    for (let i = 0; i < n; i++) {
+      const b = Math.pow(Math.random(), 2.3), a = 0.16 + b * 0.5, t = Math.random();
+      sc.fillStyle = t > 0.9 ? `rgba(232,200,122,${a})` : t > 0.55 ? `rgba(170,215,255,${a})` : `rgba(255,255,255,${a})`;
+      sc.beginPath(); sc.arc(Math.random() * W, Math.random() * H, 0.3 + b * 1.1, 0, TWO); sc.fill();
+    }
+  }
+  window.addEventListener('resize', () => { resize(); if (cur >= 0) go(cur); });
+
+  /* 透視投影：カメラは原点、+z 奥。f は焦点距離係数 */
+  function proj(x, y, z, f) { const s = f / z; return [W / 2 + x * s, H / 2 + y * s, s]; }
+
+  function paintBg(alpha) {
+    if (alpha != null) {                                   // トレイル用フェード
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = `rgba(4,5,11,${alpha})`;
+      ctx.fillRect(0, 0, W, H);
+      return;
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#04050b'; ctx.fillRect(0, 0, W, H);
+    const g = ctx.createRadialGradient(W / 2, H * 0.18, 0, W / 2, H * 0.3, Math.max(W, H));
+    g.addColorStop(0, 'rgba(16,22,48,.55)'); g.addColorStop(0.55, 'rgba(7,10,24,.2)'); g.addColorStop(1, 'rgba(3,4,10,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.drawImage(starCv, 0, 0, W, H);
+  }
+
+  /* ════════════════ パターン定義 ════════════════ */
+  const patterns = [];
+
+  /* 1) 波の海 — 数千の光点が描く 3D 波面。クレストが発光する */
+  patterns.push({
+    jp: '波の海', en: 'Sea of Waves', trail: false,
+    init() {
+      return {
+        cols: 110, rows: 60, spanX: rr(7, 9), nearZ: 1.3, depth: rr(8, 10),
+        ground: rr(0.9, 1.2), f: () => Math.min(W, H) * 1.1,
+        waves: [
+          { kx: rr(0.5, 0.9), kz: rr(0.3, 0.6), amp: rr(0.18, 0.28), sp: rr(0.5, 0.8), ph: rr(0, TWO) },
+          { kx: rr(1.1, 1.8), kz: rr(0.8, 1.4), amp: rr(0.06, 0.11), sp: rr(0.8, 1.2), ph: rr(0, TWO) },
+          { kx: rr(2.4, 3.4), kz: rr(1.8, 2.6), amp: rr(0.015, 0.035), sp: rr(1.4, 2.0), ph: rr(0, TWO) }
+        ],
+        sway: rr(0.04, 0.09), swaySp: rr(0.07, 0.12),
+        goldP: 0.012, roadX: rr(-1.4, 1.4), roadW: rr(0.3, 0.5)
+      };
+    },
+    frame(P, t) {
+      paintBg();
+      ctx.globalCompositeOperation = 'lighter';
+      const f = P.f();
+      const sway = Math.sin(t * P.swaySp) * P.sway;
+      let aMax = 0;
+      for (const w of P.waves) aMax += w.amp;
+
+      /* 地平線ににじむ光源（光の道の根元） */
+      const farZ = P.nearZ + P.depth * 0.97;
+      const [hx, hy] = proj(P.roadX + sway * farZ, P.ground, farZ, f);
+      const hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, Math.min(W, H) * 0.34);
+      hg.addColorStop(0, 'rgba(235,240,255,.34)');
+      hg.addColorStop(0.35, 'rgba(160,200,255,.12)');
+      hg.addColorStop(1, 'rgba(120,170,255,0)');
+      ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(hx, hy, Math.min(W, H) * 0.34, 0, TWO); ctx.fill();
+
+      for (let j = P.rows - 1; j >= 0; j--) {
+        const z = P.nearZ + (j / (P.rows - 1)) * P.depth;
+        const fog = 1 - (z - P.nearZ) / P.depth;
+        if (fog <= 0.02) continue;
+        for (let i = 0; i < P.cols; i++) {
+          const x = (i / (P.cols - 1) - 0.5) * P.spanX + sway * z;
+          let y = 0;
+          for (const w of P.waves) y += w.amp * Math.sin(w.kx * x + w.kz * z + w.sp * t + w.ph);
+          const crest = Math.min(1, Math.max(0, (y / aMax + 1) / 2));   // 0..1（高いほど明るい）
+          const [sx, sy] = proj(x, P.ground - y, z, f);
+          if (sx < -10 || sx > W + 10) continue;
+          /* 光の道：光源直下の帯がきらめく（月光の反射路） */
+          const dx = x - P.roadX - sway * z;
+          const road = Math.exp(-(dx * dx) / (2 * P.roadW * P.roadW)) * (1 - fog * 0.55);
+          const r = (0.45 + 1.9 * fog) * (0.7 + 0.6 * crest) * (1 + road * 0.7);
+          const lum = Math.min(1, fog * (0.26 + 0.84 * crest * crest) + road * (0.25 + 0.55 * crest));
+          if (road > 0.45 && crest > 0.82) {
+            ctx.fillStyle = `rgba(250,244,225,${lum.toFixed(3)})`;       // 光の道のきらめき
+          } else if ((i * 31 + j * 17) % 997 < 997 * P.goldP && crest > 0.72) {
+            ctx.fillStyle = `rgba(240,208,130,${Math.min(1, lum * 1.3).toFixed(3)})`;
+          } else {
+            const cg = 200 + 45 * crest | 0;
+            ctx.fillStyle = `rgba(${110 + 70 * crest | 0},${cg},255,${lum.toFixed(3)})`;
+          }
+          ctx.beginPath(); ctx.arc(sx, sy, r, 0, TWO); ctx.fill();
+        }
+      }
+    }
+  });
+
+  /* 2) 光の環 — トーラス結び目を流れる光の粒子（残光トレイル） */
+  patterns.push({
+    jp: '光の環', en: 'Ring of Light', trail: true,
+    init() {
+      const [p, q] = pick([[2, 3], [3, 4], [2, 5], [3, 5]]);
+      const N = 420;
+      const parts = [];
+      for (let i = 0; i < N; i++) parts.push({ u: Math.random() * TWO, sp: rr(0.045, 0.10), off: rr(-0.06, 0.06), gold: Math.random() < 0.12 });
+      return { p, q, parts, R: rr(0.95, 1.15), r2: rr(0.32, 0.45), rotX: rr(0.05, 0.1), rotY: rr(0.07, 0.13), z0: rr(3.1, 3.6), f: () => Math.min(W, H) * 1.3, t0: Math.random() * 100 };
+    },
+    frame(P, t) {
+      paintBg(0.085);                                       // フェード＝残光
+      ctx.globalCompositeOperation = 'lighter';
+      const f = P.f(), tt = t + P.t0;
+      const ax = tt * P.rotX, ay = tt * P.rotY;
+      const cax = Math.cos(ax), sax = Math.sin(ax), cay = Math.cos(ay), say = Math.sin(ay);
+      for (const pt of P.parts) {
+        pt.u += pt.sp * 0.06;
+        const u = pt.u;
+        /* トーラス結び目 (p,q) */
+        const rw = P.R + P.r2 * Math.cos(P.q * u) + pt.off;
+        let x = rw * Math.cos(P.p * u);
+        let y = rw * Math.sin(P.p * u);
+        let z = (P.r2 + pt.off) * Math.sin(P.q * u);
+        /* 回転 */
+        let y1 = y * cax - z * sax, z1 = y * sax + z * cax;
+        let x2 = x * cay + z1 * say, z2 = -x * say + z1 * cay;
+        const Z = z2 + P.z0;
+        if (Z < 0.4) continue;
+        const [sx, sy, s] = proj(x2, y1, Z, f);
+        const depth = Math.min(1, Math.max(0, 1.6 - Z / P.z0));
+        const r = Math.max(0.5, 2.6 * depth);
+        const a = 0.10 + 0.5 * depth;
+        ctx.fillStyle = pt.gold
+          ? `rgba(240,206,124,${a.toFixed(3)})`
+          : `rgba(${120 + 60 * depth | 0},${190 + 45 * depth | 0},255,${a.toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(sx, sy, r, 0, TWO); ctx.fill();
+      }
+    }
+  });
+
+  /* 3) 球面の和声 — 球面調和で脈動する光点の球 */
+  patterns.push({
+    jp: '球面の和声', en: 'Spherical Harmonics', trail: false,
+    init() {
+      const N = 1700, pts = [];
+      const ga = Math.PI * (3 - Math.sqrt(5));             // フィボナッチ球
+      for (let i = 0; i < N; i++) {
+        const yy = 1 - (i / (N - 1)) * 2;
+        const rad = Math.sqrt(1 - yy * yy);
+        const th = ga * i;
+        pts.push([Math.cos(th) * rad, yy, Math.sin(th) * rad]);
+      }
+      return {
+        pts, m1: pick([2, 3, 4]), m2: pick([3, 4, 5]),
+        amp: rr(0.11, 0.18), s1: rr(0.5, 0.9), s2: rr(0.3, 0.6),
+        rotY: rr(0.1, 0.16), rotX: rr(0.03, 0.07), z0: rr(2.9, 3.3),
+        f: () => Math.min(W, H) * 1.25, t0: Math.random() * 100
+      };
+    },
+    frame(P, t) {
+      paintBg();
+      ctx.globalCompositeOperation = 'lighter';
+      const f = P.f(), tt = t + P.t0;
+      /* 球の背後の淡い暈（コア光） */
+      const cR = Math.min(W, H) * 0.34;
+      const halo = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, cR);
+      halo.addColorStop(0, 'rgba(110,160,235,.14)');
+      halo.addColorStop(0.6, 'rgba(80,120,200,.05)');
+      halo.addColorStop(1, 'rgba(60,100,180,0)');
+      ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(W / 2, H / 2, cR, 0, TWO); ctx.fill();
+
+      const ay = tt * P.rotY, ax = Math.sin(tt * P.rotX) * 0.45;
+      const cay = Math.cos(ay), say = Math.sin(ay), cax = Math.cos(ax), sax = Math.sin(ax);
+      for (const [x0, y0, z0] of P.pts) {
+        const th = Math.acos(y0), ph = Math.atan2(z0, x0);
+        const w = Math.sin(P.m1 * th + tt * P.s1) * Math.sin(P.m2 * ph + tt * P.s2);
+        const rad = 1 + P.amp * w;
+        let x = x0 * rad, y = y0 * rad, z = z0 * rad;
+        let x1 = x * cay + z * say, z1 = -x * say + z * cay;
+        let y2 = y * cax - z1 * sax, z2 = y * sax + z1 * cax;
+        const Z = z2 + P.z0;
+        if (Z < 0.4) continue;
+        const [sx, sy] = proj(x1, y2, Z, f);
+        const front = Math.min(1, Math.max(0, (P.z0 - z2) / P.z0));   // 手前ほど明るい
+        const crest = (w + 1) / 2;
+        const a = (0.06 + 0.68 * Math.pow(front, 2.2)) * (0.42 + 0.58 * crest);
+        const r = Math.max(0.35, 2.0 * front) * (0.7 + 0.5 * crest);
+        ctx.fillStyle = crest > 0.87
+          ? `rgba(242,212,136,${Math.min(1, a * 1.5).toFixed(3)})`
+          : `rgba(${130 + 80 * crest | 0},${195 + 45 * crest | 0},255,${a.toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(sx, sy, r, 0, TWO); ctx.fill();
+      }
+    }
+  });
+
+  /* 4) 光の帛 — 3D 空間を漂う光のリボン */
+  patterns.push({
+    jp: '光の帛', en: 'Silk of Light', trail: false,
+    init() {
+      const nR = 5, ribbons = [];
+      for (let i = 0; i < nR; i++) {
+        ribbons.push({
+          y0: rr(-0.55, 0.65), z0: rr(2.0, 3.8),
+          k: rr(0.5, 1.2), amp: rr(0.22, 0.45), sp: rr(0.25, 0.55) * pick([1, -1]),
+          k2: rr(1.6, 2.6), amp2: rr(0.05, 0.12), ph: rr(0, TWO),
+          zk: rr(0.4, 0.9), zamp: rr(0.3, 0.7),
+          gold: i === 0, width: rr(0.04, 0.08), lines: 5
+        });
+      }
+      return { ribbons, spanX: 7.5, f: () => Math.min(W, H) * 1.15 };
+    },
+    frame(P, t) {
+      paintBg();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      const f = P.f();
+      const N = 140;
+      for (const R of P.ribbons) {
+        for (let l = 0; l < R.lines; l++) {
+          const lf = l / (R.lines - 1) - 0.5;               // -0.5..0.5（帯の幅方向）
+          const edge = 1 - Math.abs(lf) * 2;                // 中心ほど明るい
+          const path = new Path2D();
+          let started = false;
+          for (let i = 0; i <= N; i++) {
+            const u = (i / N - 0.5) * P.spanX;
+            const y = R.y0 + lf * R.width * 6
+              + R.amp * Math.sin(R.k * u + t * R.sp + R.ph)
+              + R.amp2 * Math.sin(R.k2 * u - t * R.sp * 1.7 + R.ph * 2);
+            const z = R.z0 + R.zamp * Math.sin(R.zk * u + t * R.sp * 0.6 + R.ph) + lf * 0.12;
+            if (z < 0.5) { started = false; continue; }
+            const [sx, sy] = proj(u, y, z, f);
+            if (!started) { path.moveTo(sx, sy); started = true; } else path.lineTo(sx, sy);
+          }
+          /* 画面端で透ける色（光の帯らしさ） */
+          const a = (0.1 + 0.36 * edge * edge) * (R.gold ? 1.25 : 1);
+          const lg = ctx.createLinearGradient(0, 0, W, 0);
+          const col = R.gold ? '238,204,124' : '140,200,255';
+          lg.addColorStop(0, `rgba(${col},0)`);
+          lg.addColorStop(0.18, `rgba(${col},${(a * 0.8).toFixed(3)})`);
+          lg.addColorStop(0.5, `rgba(${col},${a.toFixed(3)})`);
+          lg.addColorStop(0.82, `rgba(${col},${(a * 0.8).toFixed(3)})`);
+          lg.addColorStop(1, `rgba(${col},0)`);
+          ctx.strokeStyle = lg;
+          ctx.lineWidth = 3.4; ctx.globalAlpha = 0.4; ctx.stroke(path);   // にじみ
+          ctx.lineWidth = 1.1; ctx.globalAlpha = 1; ctx.stroke(path);     // 芯
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+  });
+
+  /* 5) 波の隧道 — 波打つリングの中を進む */
+  patterns.push({
+    jp: '波の隧道', en: 'Wave Tunnel', trail: false,
+    init() {
+      return {
+        nRings: 42, spacing: rr(0.55, 0.7), speed: rr(0.8, 1.2),
+        R0: rr(1.0, 1.25), m: pick([3, 5, 6, 7]), wamp: rr(0.07, 0.16), wsp: rr(0.6, 1.1),
+        swayA: rr(0.2, 0.45), swayS: rr(0.12, 0.2),
+        f: () => Math.min(W, H) * 0.95, segs: 110, ph: rr(0, TWO)
+      };
+    },
+    frame(P, t) {
+      paintBg();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.lineJoin = 'round';
+      const f = P.f();
+      const depth = P.nRings * P.spacing;
+      const camX = Math.sin(t * P.swayS) * P.swayA;
+      const camY = Math.cos(t * P.swayS * 0.8) * P.swayA * 0.6;
+
+      /* 隧道の奥に灯る光（消失点） */
+      const [vx, vy] = proj(camX * 0.12, camY * 0.12, depth * 0.92, f);
+      const vr = Math.min(W, H) * 0.16;
+      const vg = ctx.createRadialGradient(vx, vy, 0, vx, vy, vr);
+      vg.addColorStop(0, 'rgba(244,238,222,.6)');
+      vg.addColorStop(0.4, 'rgba(190,210,255,.2)');
+      vg.addColorStop(1, 'rgba(150,180,255,0)');
+      ctx.fillStyle = vg; ctx.beginPath(); ctx.arc(vx, vy, vr, 0, TWO); ctx.fill();
+
+      for (let i = P.nRings - 1; i >= 0; i--) {
+        let z = i * P.spacing - ((t * P.speed) % P.spacing);
+        z = z + 0.5;
+        if (z < 0.42) continue;
+        const fog = Math.max(0, 1 - z / depth);
+        const a = Math.pow(fog, 1.6) * 0.6;
+        if (a < 0.01) continue;
+        const idx = Math.floor((t * P.speed) / P.spacing) + i;   // ワールド上のリング番号
+        const gold = (idx % 9) === 0;
+        const col = gold
+          ? `rgba(238,204,124,${(a * 1.05).toFixed(3)})`
+          : `rgba(${120 + 70 * fog | 0},${190 + 50 * fog | 0},255,${a.toFixed(3)})`;
+        const path = new Path2D();
+        for (let s = 0; s <= P.segs; s++) {
+          const ang = (s / P.segs) * TWO;
+          const rad = P.R0 + P.wamp * Math.sin(P.m * ang + idx * 0.7 + t * P.wsp + P.ph);
+          const x = Math.cos(ang) * rad + camX * (1 - z / depth);
+          const y = Math.sin(ang) * rad + camY * (1 - z / depth);
+          const [sx, sy] = proj(x, y, z, f);
+          if (s === 0) path.moveTo(sx, sy); else path.lineTo(sx, sy);
+        }
+        ctx.strokeStyle = col;
+        ctx.lineWidth = Math.max(1.8, 6 * fog); ctx.globalAlpha = 0.33; ctx.stroke(path);  // にじみ
+        ctx.lineWidth = Math.max(0.6, 2.0 * fog); ctx.globalAlpha = 1; ctx.stroke(path);   // 芯
+      }
+      ctx.globalAlpha = 1;
+    }
+  });
+
+  /* ════════════════ エンジン ════════════════ */
+  let cur = -1, P = null, raf = 0, t0 = 0, tOffset = 0;
+  let frames = 0, fpsT = 0;
+  /* ?p=2&t=8 または #p=2&t=8（file:// ではクエリが使えないためハッシュも受ける） */
+  const q = new URLSearchParams(location.search ? location.search.slice(1) : location.hash.slice(1));
+  const fixedT = q.has('t') ? parseFloat(q.get('t')) : null;    // デバッグ/静止モード
+
+  function initPattern() {
+    P = patterns[cur].init();
+    paintBg();                                              // トレイル系の残像をリセット
+    $('nameJp').textContent = patterns[cur].jp;
+    $('nameEn').textContent = patterns[cur].en;
+    $('pidx').textContent = (cur + 1) + ' / ' + patterns.length;
+    t0 = performance.now();
+    tOffset = rr(0, 40);                                    // 読込ごとに違う瞬間から始まる
+  }
+  function go(i) {
+    cur = ((i % patterns.length) + patterns.length) % patterns.length;
+    initPattern();
+    if (fixedT != null || reduce) renderStatic();
+  }
+  function renderStatic() {
+    const t = (fixedT != null ? fixedT : 7);
+    if (patterns[cur].trail) {                              // トレイル系は数十フレーム焼き込む
+      for (let k = 0; k < 90; k++) patterns[cur].frame(P, t + k * 0.016);
+    } else {
+      patterns[cur].frame(P, t);
+    }
+  }
+  function loop(now) {
+    raf = 0;
+    const t = (now - t0) / 1000 + tOffset;
+    patterns[cur].frame(P, t);
+    frames++;
+    if (now - fpsT > 800) {
+      $('fps').textContent = Math.round(frames * 1000 / (now - fpsT)) + ' fps';
+      frames = 0; fpsT = now;
+    }
+    raf = requestAnimationFrame(loop);
+  }
+
+  $('prevBtn').addEventListener('click', () => go(cur - 1));
+  $('nextBtn').addEventListener('click', () => go(cur + 1));
+  $('reBtn').addEventListener('click', () => go(cur));
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') go(cur - 1);
+    else if (e.key === 'ArrowRight') go(cur + 1);
+    else if (e.key === 'r' || e.key === 'R') go(cur);
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { if (raf) { cancelAnimationFrame(raf); raf = 0; } }
+    else if (fixedT == null && !reduce && !raf) { t0 = performance.now(); raf = requestAnimationFrame(loop); }
+  });
+
+  resize();
+  go(q.has('p') ? (parseInt(q.get('p'), 10) || 0) : (Math.random() * patterns.length) | 0);
+  if (fixedT == null && !reduce) raf = requestAnimationFrame(loop);
+  </script>
+
+</body>
+</html>
