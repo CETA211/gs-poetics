@@ -109,8 +109,9 @@
   let W = 0, H = 0, DPR = 1, starCv = null;
 
   function resize() {
-    DPR = Math.min(window.devicePixelRatio || 1, 2);     // 高解像度（Retina フル活用）
     W = window.innerWidth; H = window.innerHeight;
+    /* 高解像度は活かしつつ、総バックピクセルを約5Mに制限（通常のRetinaはほぼDPR2維持・4K/5Kの暴走のみ抑制） */
+    DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(5000000 / Math.max(1, W * H))));
     cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     /* 静的な星层（毎フレーム drawImage するだけ＝安い） */
