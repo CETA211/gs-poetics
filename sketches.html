@@ -421,6 +421,99 @@
     }
   });
 
+  /* 6) 銀河 — 密度波がえがく渦巻銀河。歳差する楕円軌道の群れが腕を結ぶ */
+  patterns.push({
+    jp: '銀河', en: 'Spiral Galaxy', trail: false,
+    init() {
+      const N = Math.min(4200, Math.max(2400, Math.round(W * H / 460)));
+      function glow(rgb) {
+        const s = document.createElement('canvas'), px = 64; s.width = s.height = px;
+        const c = s.getContext('2d');
+        const g = c.createRadialGradient(px / 2, px / 2, 0, px / 2, px / 2, px / 2);
+        g.addColorStop(0, `rgba(${rgb},1)`); g.addColorStop(0.22, `rgba(${rgb},.5)`); g.addColorStop(1, `rgba(${rgb},0)`);
+        c.fillStyle = g; c.fillRect(0, 0, px, px); return s;
+      }
+      const SPR = { core: glow('255,238,205'), white: glow('230,239,255'), blue: glow('150,196,255'), pink: glow('255,170,205') };
+      const arms = pick([2, 2, 2, 4]);                          // 主に2本腕、たまに4本
+      const armPhase = TWO / arms;
+      const maxR = 1.65;
+      const stars = [];
+      for (let i = 0; i < N; i++) {
+        const u = Math.random();
+        const rad = 0.05 + maxR * Math.pow(u, 1.5);            // 中心集中
+        const spiral = Math.random() < 0.82 && rad > 0.16;     // 腕に乗る星 / バルジ・ハロー
+        const z = (Math.random() - 0.5) * 2 * (0.03 + 0.3 * Math.exp(-rad * 1.9)); // バルジ厚・円盤薄
+        let a0, kind, br;
+        if (spiral) {
+          const scatterW = (0.10 + 0.055 * rad) / Math.sqrt(arms / 2);  // くっきりめ・外ほど少し太く
+          const scatter = ((Math.random() + Math.random() + Math.random()) / 3 - 0.5) * 2 * scatterW; // 近似ガウス
+          a0 = Math.floor(Math.random() * arms) * armPhase + scatter;
+          if (rad > 0.4 && Math.random() < 0.08) { kind = 'pink'; br = rr(0.78, 1.0); }    // HII領域（若い星形成）
+          else if (Math.random() < 0.74) { kind = 'blue'; br = rr(0.4, 0.84); }
+          else { kind = 'white'; br = rr(0.34, 0.66); }
+        } else {
+          a0 = Math.random() * TWO;
+          if (rad < 0.45) { kind = 'core'; br = rr(0.5, 1.0); }
+          else { kind = 'white'; br = rr(0.12, 0.34); }
+        }
+        const big = spiral && Math.random() < 0.03;           // 分解された輝星（きらめき）
+        stars.push({ rad, a0, spiral, z, kind, br, size: rr(0.7, 1.7) * (big ? 2.1 : 1), big, tw: Math.random() * TWO, twSp: rr(0.5, 1.3) });
+      }
+      return {
+        stars, SPR, twist: rr(3.8, 5.2) * (Math.random() < 0.5 ? 1 : -1),  // 対数螺旋の巻きの強さ
+        patternSp: rr(0.05, 0.1) * (Math.random() < 0.5 ? 1 : -1),
+        tiltX: rr(0.5, 0.82), yaw0: rr(0, TWO), yawSp: rr(0.012, 0.035),
+        camZ: rr(3.0, 3.5), f: () => Math.min(W, H) * 1.0, t0: Math.random() * 60
+      };
+    },
+    frame(P, t) {
+      paintBg();
+      ctx.globalCompositeOperation = 'lighter';
+      const f = P.f(), tt = t + P.t0;
+      const cT = Math.cos(P.tiltX), sT = Math.sin(P.tiltX);
+      const yaw = P.yaw0 + tt * P.yawSp, cY = Math.cos(yaw), sY = Math.sin(yaw);
+      const pat = P.patternSp * tt;
+
+      /* 円盤のヘイズ＆バルジは、傾きに合わせて楕円に潰す（円盤面に乗って見える） */
+      const [bx, by] = proj(0, 0, P.camZ, f);
+      const squash = Math.max(0.34, cT);                      // tiltX が深いほど縦に潰れる
+      ctx.save(); ctx.translate(bx, by); ctx.scale(1, squash);
+      const hzR = Math.min(W, H) * 0.52;
+      const haze = ctx.createRadialGradient(0, 0, 0, 0, 0, hzR);
+      haze.addColorStop(0, 'rgba(96,124,205,.12)'); haze.addColorStop(0.5, 'rgba(70,92,172,.045)'); haze.addColorStop(1, 'rgba(60,80,150,0)');
+      ctx.fillStyle = haze; ctx.beginPath(); ctx.arc(0, 0, hzR, 0, TWO); ctx.fill();
+      ctx.restore();
+      /* 中心バルジの輝き（こちらは球状なのでほぼ円・わずかに潰す） */
+      const bSq = 0.78 + 0.22 * squash;
+      ctx.save(); ctx.translate(bx, by); ctx.scale(1, bSq);
+      const br1 = Math.min(W, H) * 0.19;
+      const bg = ctx.createRadialGradient(0, 0, 0, 0, 0, br1);
+      bg.addColorStop(0, 'rgba(255,244,220,.6)'); bg.addColorStop(0.32, 'rgba(255,224,160,.2)'); bg.addColorStop(1, 'rgba(255,210,140,0)');
+      ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(0, 0, br1, 0, TWO); ctx.fill();
+      ctx.restore();
+
+      for (const st of P.stars) {
+        /* 対数螺旋：腕の中心角 = twist·ln(r) 。パターン全体を剛体回転 */
+        const theta = (st.spiral ? P.twist * Math.log(st.rad + 0.32) : 0) + st.a0 + pat;
+        const gx = st.rad * Math.cos(theta), gy = st.rad * Math.sin(theta), gz = st.z;
+        const y1 = gy * cT - gz * sT, z1 = gy * sT + gz * cT;          // tilt(X)
+        const x2 = gx * cY + z1 * sY, z2 = -gx * sY + z1 * cY;         // yaw(Y)
+        const Z = z2 + P.camZ;
+        if (Z < 0.4) continue;
+        const [sx, sy, s] = proj(x2, y1, Z, f);
+        if (sx < -40 || sx > W + 40 || sy < -40 || sy > H + 40) continue;
+        const front = Math.min(1, Math.max(0.2, (P.camZ + 1.6 - Z) / 3.2));    // 近い面ほど明るい
+        const twk = (st.big ? 0.7 + 0.3 * Math.sin(tt * st.twSp + st.tw) : 0.82 + 0.18 * Math.sin(tt * st.twSp + st.tw)); // 瞬き（輝星は強め）
+        const a = Math.min(1, st.br * front * twk);
+        if (a < 0.035) continue;
+        const size = Math.max(1.4, st.size * s * 0.014) * (st.kind === 'pink' ? 1.5 : 1);
+        ctx.globalAlpha = a;
+        ctx.drawImage(P.SPR[st.kind], sx - size / 2, sy - size / 2, size, size);
+      }
+      ctx.globalAlpha = 1;
+    }
+  });
+
   /* ════════════════ エンジン ════════════════ */
   let cur = -1, P = null, raf = 0, t0 = 0, tOffset = 0;
   let frames = 0, fpsT = 0;
