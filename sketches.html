@@ -515,6 +515,251 @@
     }
   });
 
+  /* 7) オーロラ — 3D空間に揺らめく光のヴェール。緑から菫へ色が登る */
+  patterns.push({
+    jp: 'オーロラ', en: 'Aurora', trail: false,
+    init() {
+      function streak(stops) {
+        const w = 14, h = 256, s = document.createElement('canvas'); s.width = w; s.height = h;
+        const c = s.getContext('2d');
+        const g = c.createLinearGradient(0, 0, 0, h);
+        for (const st of stops) g.addColorStop(st[0], st[1]);
+        c.fillStyle = g; c.fillRect(0, 0, w, h);
+        return s;
+      }
+      const palettes = [
+        [[0, 'rgba(150,90,230,0)'], [0.18, 'rgba(168,112,242,.5)'], [0.5, 'rgba(110,228,210,.78)'], [0.82, 'rgba(122,255,170,.85)'], [1, 'rgba(122,255,170,0)']],
+        [[0, 'rgba(120,200,255,0)'], [0.2, 'rgba(120,200,255,.5)'], [0.55, 'rgba(120,246,212,.8)'], [0.85, 'rgba(150,255,162,.8)'], [1, 'rgba(150,255,162,0)']],
+        [[0, 'rgba(222,120,236,0)'], [0.22, 'rgba(214,120,242,.55)'], [0.55, 'rgba(140,212,236,.72)'], [0.85, 'rgba(132,250,182,.8)'], [1, 'rgba(132,250,182,0)']]
+      ];
+      const sprites = palettes.map(streak);
+      const nC = 5 + (Math.random() * 3 | 0), curtains = [];
+      for (let i = 0; i < nC; i++) {
+        curtains.push({
+          cx: rr(-0.42, 0.42) * 9, halfW: rr(1.3, 3.0),     // 横方向の区間（ヴェールの広がり）
+          z: rr(1.6, 5.2), spr: sprites[(Math.random() * sprites.length) | 0],
+          baseY: rr(0.42, 0.6), height: rr(1.2, 2.2),
+          k1: rr(1.2, 2.6), a1: rr(0.35, 0.9), drape: rr(0.05, 0.16),
+          sp: rr(0.18, 0.4) * (Math.random() < 0.5 ? 1 : -1), ph: rr(0, TWO),
+          flickK: rr(1.2, 2.6), flickSp: rr(0.5, 1.0), cols: 64
+        });
+      }
+      return { curtains, f: () => Math.min(W, H) * 1.05, t0: Math.random() * 40 };
+    },
+    frame(P, t) {
+      paintBg();
+      ctx.globalCompositeOperation = 'lighter';
+      const f = P.f(), tt = t + P.t0;
+      for (const cu of P.curtains) {
+        const colW = Math.max(3, (2 * cu.halfW / cu.cols) * f / cu.z * 1.25);  // 重ねて連続面に
+        for (let i = 0; i < cu.cols; i++) {
+          const s = i / (cu.cols - 1) * 2 - 1;                 // -1..1（区間内）
+          const win = Math.pow(Math.cos(s * Math.PI / 2), 0.55); // 端で柔らかく消える
+          if (win < 0.02) continue;
+          const wx = cu.cx + s * cu.halfW;
+          const wz = cu.z + cu.a1 * Math.sin(cu.k1 * s * Math.PI + tt * cu.sp + cu.ph);
+          if (wz < 0.5) continue;
+          const baseY = cu.baseY + cu.drape * Math.sin(cu.k1 * 0.7 * s * Math.PI - tt * cu.sp * 0.8);
+          const fl = 0.5 + 0.5 * Math.sin(cu.flickK * s * Math.PI + tt * cu.flickSp + cu.ph);
+          const hgt = cu.height * (0.78 + 0.22 * Math.sin(cu.flickK * 0.6 * s * Math.PI - tt * 0.5 + cu.ph)) * (0.55 + 0.45 * win);
+          const bx = proj(wx, baseY, wz, f), tx = proj(wx, baseY - hgt, wz, f);
+          const depthFade = Math.max(0, Math.min(1, 1.15 - (wz - 1.6) / 4.4));
+          ctx.globalAlpha = Math.min(1, (0.45 + 0.55 * fl) * win * depthFade);
+          ctx.drawImage(cu.spr, bx[0] - colW / 2, tx[1], colW, bx[1] - tx[1]);
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+  });
+
+  /* 8) クラドニ — 砂粒が定在波の節線に集まり、幾何学が立ち上がる（音→かたち） */
+  patterns.push({
+    jp: 'クラドニ', en: 'Chladni Figures', trail: false,
+    init() {
+      const N = Math.min(5200, Math.max(2800, Math.round(W * H / 360)));
+      const pts = new Float32Array(N * 2);
+      for (let i = 0; i < N; i++) { pts[i * 2] = Math.random(); pts[i * 2 + 1] = Math.random(); }
+      const nm = () => 1 + (Math.random() * 6 | 0);
+      const P = {
+        N, pts, n0: nm(), m0: nm(), n1: 0, m1: 0, hold: 0,
+        span: rr(2.3, 2.7), tilt: rr(0.5, 0.82), camZ: rr(2.9, 3.2), f: () => Math.min(W, H) * 0.92,
+        sprite: (() => { const px = 18, s = document.createElement('canvas'); s.width = s.height = px; const c = s.getContext('2d'); const g = c.createRadialGradient(px / 2, px / 2, 0, px / 2, px / 2, px / 2); g.addColorStop(0, 'rgba(246,234,196,1)'); g.addColorStop(0.4, 'rgba(234,212,152,.5)'); g.addColorStop(1, 'rgba(234,212,152,0)'); c.fillStyle = g; c.fillRect(0, 0, px, px); return s; })()
+      };
+      P.n1 = P.n0; P.m1 = P.m0;
+      /* 初期整定：開始時点で図形が立ち上がっているように節線へ寄せる */
+      const a = Math.PI * P.n0, b = Math.PI * P.m0;
+      for (let it = 0; it < 180; it++) {
+        for (let i = 0; i < N; i++) {
+          let x = pts[i * 2], y = pts[i * 2 + 1];
+          const ax = a * x, bx = b * x, ay = a * y, by = b * y;
+          const fv = Math.cos(ax) * Math.cos(by) - Math.cos(bx) * Math.cos(ay);
+          const fx = -a * Math.sin(ax) * Math.cos(by) + b * Math.sin(bx) * Math.cos(ay);
+          const fy = -b * Math.cos(ax) * Math.sin(by) + a * Math.cos(bx) * Math.sin(ay);
+          x -= 0.0013 * fv * fx; y -= 0.0013 * fv * fy;
+          if (x < 0) x = -x; else if (x > 1) x = 2 - x;
+          if (y < 0) y = -y; else if (y > 1) y = 2 - y;
+          pts[i * 2] = x; pts[i * 2 + 1] = y;
+        }
+      }
+      return P;
+    },
+    frame(P, t) {
+      paintBg();
+      P.hold += 1 / 60;
+      const mt = Math.min(1, P.hold / 4);
+      const ease = mt < 0.5 ? 2 * mt * mt : 1 - Math.pow(-2 * mt + 2, 2) / 2;
+      const n = P.n0 + (P.n1 - P.n0) * ease, m = P.m0 + (P.m1 - P.m0) * ease;
+      if (P.hold > 6.5) { P.n0 = P.n1; P.m0 = P.m1; P.n1 = 1 + (Math.random() * 6 | 0); P.m1 = 1 + (Math.random() * 6 | 0); P.hold = 0; }
+      const a = Math.PI * n, b = Math.PI * m;
+      const lr = 0.0012, jit = 0.0016;
+      for (let i = 0; i < P.N; i++) {
+        let x = P.pts[i * 2], y = P.pts[i * 2 + 1];
+        const ax = a * x, bx = b * x, ay = a * y, by = b * y;
+        const fv = Math.cos(ax) * Math.cos(by) - Math.cos(bx) * Math.cos(ay);
+        const fx = -a * Math.sin(ax) * Math.cos(by) + b * Math.sin(bx) * Math.cos(ay);
+        const fy = -b * Math.cos(ax) * Math.sin(by) + a * Math.cos(bx) * Math.sin(ay);
+        x -= lr * fv * fx; y -= lr * fv * fy;
+        const af = Math.abs(fv);
+        x += (Math.random() - 0.5) * jit * (0.3 + af); y += (Math.random() - 0.5) * jit * (0.3 + af);
+        if (x < 0) x = -x; else if (x > 1) x = 2 - x;
+        if (y < 0) y = -y; else if (y > 1) y = 2 - y;
+        P.pts[i * 2] = x; P.pts[i * 2 + 1] = y;
+      }
+      ctx.globalCompositeOperation = 'lighter';
+      const f = P.f(), cT = Math.cos(P.tilt), sT = Math.sin(P.tilt);
+      for (let i = 0; i < P.N; i++) {
+        const x = P.pts[i * 2], y = P.pts[i * 2 + 1];
+        const wx = (x - 0.5) * P.span, wz = (y - 0.5) * P.span;
+        const y1 = -wz * sT, z1 = wz * cT;
+        const pr = proj(wx, y1, z1 + P.camZ, f);
+        const af = Math.abs(Math.cos(a * x) * Math.cos(b * y) - Math.cos(b * x) * Math.cos(a * y));
+        const br = Math.max(0, 1 - af * 2.3);
+        ctx.globalAlpha = 0.22 + 0.62 * br;
+        const sz = 2.3 + 2.2 * br;
+        ctx.drawImage(P.sprite, pr[0] - sz / 2, pr[1] - sz / 2, sz, sz);
+      }
+      ctx.globalAlpha = 1;
+      /* 板の縁 */
+      ctx.strokeStyle = 'rgba(120,150,210,.22)'; ctx.lineWidth = 1;
+      const cor = [[-.5, -.5], [.5, -.5], [.5, .5], [-.5, .5]];
+      ctx.beginPath();
+      for (let k = 0; k <= 4; k++) { const cx = cor[k % 4][0] * P.span, cz = cor[k % 4][1] * P.span; const pr = proj(cx, -cz * sT, cz * cT + P.camZ, f); if (k === 0) ctx.moveTo(pr[0], pr[1]); else ctx.lineTo(pr[0], pr[1]); }
+      ctx.stroke();
+    }
+  });
+
+  /* 9) 超立方体 — 四次元立方体の影。二重回転で内外が入れ替わる */
+  patterns.push({
+    jp: '超立方体', en: 'Tesseract', trail: false,
+    init() {
+      const V = [], E = [];
+      for (let i = 0; i < 16; i++) V.push([(i & 1) ? 1 : -1, (i & 2) ? 1 : -1, (i & 4) ? 1 : -1, (i & 8) ? 1 : -1]);
+      for (let i = 0; i < 16; i++) for (let j = i + 1; j < 16; j++) {
+        let d = 0; for (let k = 0; k < 4; k++) if (V[i][k] !== V[j][k]) d++;
+        if (d === 1) E.push([i, j]);
+      }
+      return {
+        V, E, sp1: rr(0.16, 0.28) * (Math.random() < .5 ? 1 : -1), sp2: rr(0.11, 0.2), sp3: rr(0.04, 0.1),
+        tilt: rr(0.18, 0.5), camZ: rr(3.5, 4.0), f: () => Math.min(W, H) * 0.74, t0: Math.random() * 30,
+        goldEdge: (Math.random() * 32) | 0
+      };
+    },
+    frame(P, t) {
+      paintBg();
+      ctx.globalCompositeOperation = 'lighter';
+      const f = P.f(), tt = t + P.t0;
+      const a = tt * P.sp1, b = tt * P.sp2, c = tt * P.sp3;
+      const ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b), cc = Math.cos(c), sc = Math.sin(c);
+      const cT = Math.cos(P.tilt), sT = Math.sin(P.tilt);
+      const pts = P.V.map(v => {
+        let x = v[0], y = v[1], z = v[2], w = v[3];
+        let x1 = x * ca - w * sa, w1 = x * sa + w * ca;            // 回転 xw
+        let y1 = y * cb - z * sb, z1 = y * sb + z * cb;            // 回転 yz
+        let x2 = x1 * cc - y1 * sc, y2 = x1 * sc + y1 * cc;        // 回転 xy
+        const kk = 2.1 / (3.1 - w1);                               // 4D→3D 透視
+        let X = x2 * kk, Y = y2 * kk, Z = z1 * kk;
+        let Yt = Y * cT - Z * sT, Zt = Y * sT + Z * cT;            // 3D 傾き
+        const Zc = Zt + P.camZ;
+        const pr = proj(X, Yt, Zc, f);
+        return [pr[0], pr[1], Zc];
+      });
+      for (let e = 0; e < P.E.length; e++) {
+        const A = pts[P.E[e][0]], B = pts[P.E[e][1]];
+        const depth = Math.max(0.12, Math.min(1, 1 - ((A[2] + B[2]) / 2 - (P.camZ - 1.9)) / 3.6));
+        const al = 0.1 + 0.6 * depth;
+        const gold = e === P.goldEdge || e === (P.E.length - 1 - P.goldEdge);
+        ctx.strokeStyle = `rgba(106,205,255,${(al * 0.6).toFixed(3)})`; ctx.lineWidth = 6 * depth;
+        ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
+        ctx.strokeStyle = gold ? `rgba(242,208,132,${Math.min(1, al * 1.3).toFixed(3)})` : `rgba(184,230,255,${Math.min(1, al * 1.15).toFixed(3)})`;
+        ctx.lineWidth = 1.25; ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
+      }
+      for (let i = 0; i < pts.length; i++) {
+        const p = pts[i], depth = Math.max(0.12, Math.min(1, 1 - (p[2] - (P.camZ - 1.9)) / 3.6));
+        ctx.fillStyle = `rgba(200,228,255,${(0.25 + 0.55 * depth).toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(p[0], p[1], 1.6 + 2.4 * depth, 0, TWO); ctx.fill();
+      }
+    }
+  });
+
+  /* 10) 結晶 — 3D格子を伝わる光の波（フォノン）。波頭で結晶が灯る */
+  patterns.push({
+    jp: '結晶', en: 'Crystal Lattice', trail: false,
+    init() {
+      const G = pick([4, 5, 5]); const step = 2 / (G - 1);
+      const nodes = [];
+      for (let ix = 0; ix < G; ix++) for (let iy = 0; iy < G; iy++) for (let iz = 0; iz < G; iz++)
+        nodes.push([-1 + ix * step, -1 + iy * step, -1 + iz * step]);
+      const edges = [], tol = step * 1.06;
+      for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i][0] - nodes[j][0], dy = nodes[i][1] - nodes[j][1], dz = nodes[i][2] - nodes[j][2];
+        if (dx * dx + dy * dy + dz * dz < tol * tol) edges.push([i, j]);
+      }
+      let wd = [rr(-1, 1), rr(-1, 1), rr(-1, 1)]; const wl = Math.hypot(wd[0], wd[1], wd[2]) || 1; wd = [wd[0] / wl, wd[1] / wl, wd[2] / wl];
+      return {
+        nodes, edges, wd, k: rr(2.6, 3.8), w: rr(1.6, 2.4), amp: rr(0.05, 0.1),
+        rotY: rr(0.1, 0.18) * (Math.random() < .5 ? 1 : -1), rotX: rr(0.05, 0.12), scale: rr(1.15, 1.35),
+        camZ: rr(3.3, 3.8), f: () => Math.min(W, H) * 0.7, t0: Math.random() * 30,
+        spr: (() => { const px = 48, s = document.createElement('canvas'); s.width = s.height = px; const c = s.getContext('2d'); const g = c.createRadialGradient(px / 2, px / 2, 0, px / 2, px / 2, px / 2); g.addColorStop(0, 'rgba(214,232,255,1)'); g.addColorStop(0.3, 'rgba(150,200,255,.5)'); g.addColorStop(1, 'rgba(150,200,255,0)'); c.fillStyle = g; c.fillRect(0, 0, px, px); return s; })()
+      };
+    },
+    frame(P, t) {
+      paintBg();
+      ctx.globalCompositeOperation = 'lighter';
+      const f = P.f(), tt = t + P.t0;
+      const ay = tt * P.rotY, ax = Math.sin(tt * P.rotX) * 0.5;
+      const cay = Math.cos(ay), say = Math.sin(ay), cax = Math.cos(ax), sax = Math.sin(ax);
+      const sc = P.scale, N = P.nodes.length;
+      const PX = new Float32Array(N), PY = new Float32Array(N), PZ = new Float32Array(N), WV = new Float32Array(N);
+      for (let i = 0; i < N; i++) {
+        const nd = P.nodes[i];
+        const wv = Math.sin(P.k * (nd[0] * P.wd[0] + nd[1] * P.wd[1] + nd[2] * P.wd[2]) - P.w * tt);
+        WV[i] = wv; const disp = P.amp * wv;
+        let x = (nd[0] + P.wd[0] * disp) * sc, y = (nd[1] + P.wd[1] * disp) * sc, z = (nd[2] + P.wd[2] * disp) * sc;
+        const x1 = x * cay + z * say, z1 = -x * say + z * cay;
+        const y2 = y * cax - z1 * sax, z2 = y * sax + z1 * cax;
+        const Z = z2 + P.camZ;
+        const pr = proj(x1, y2, Z, f);
+        PX[i] = pr[0]; PY[i] = pr[1]; PZ[i] = Z;
+      }
+      for (let e = 0; e < P.edges.length; e++) {
+        const i = P.edges[e][0], j = P.edges[e][1];
+        const lit = Math.max(0, (WV[i] + WV[j]) / 2);
+        const depth = Math.max(0.12, Math.min(1, 1 - (Math.min(PZ[i], PZ[j]) - (P.camZ - 1.8)) / 3.4));
+        const al = 0.05 + 0.11 * depth + 0.34 * lit * depth;
+        ctx.strokeStyle = lit > 0.5 ? `rgba(240,208,134,${Math.min(0.92, al * 1.4).toFixed(3)})` : `rgba(132,188,255,${Math.min(1, al * 1.1).toFixed(3)})`;
+        ctx.lineWidth = 0.9 + 2.0 * lit * depth;
+        ctx.beginPath(); ctx.moveTo(PX[i], PY[i]); ctx.lineTo(PX[j], PY[j]); ctx.stroke();
+      }
+      for (let i = 0; i < N; i++) {
+        const lit = Math.max(0, WV[i]); const depth = Math.max(0.12, Math.min(1, 1 - (PZ[i] - (P.camZ - 1.8)) / 3.4));
+        ctx.globalAlpha = Math.min(1, (0.1 + 0.4 * depth) * (0.5 + 0.7 * lit));
+        const sz = (2 + 5 * depth) * (0.7 + 0.6 * lit);
+        ctx.drawImage(P.spr, PX[i] - sz / 2, PY[i] - sz / 2, sz, sz);
+      }
+      ctx.globalAlpha = 1;
+    }
+  });
+
   /* ════════════════ エンジン ════════════════ */
   let cur = -1, P = null, raf = 0, t0 = 0, tOffset = 0;
   let frames = 0, fpsT = 0;
